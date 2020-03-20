@@ -1,9 +1,6 @@
 package de.noack.service;
 
 import de.noack.client.pulsar.ReportPulsarClient;
-import org.apache.pulsar.client.api.PulsarClientException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -11,31 +8,44 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
+
 @RequestScoped
 public class ReportService {
-    private static final Logger log = LoggerFactory.getLogger(ReportService.class);
+    private static final String IMPLEMENTATION_MISSING = "Not yet implemented!";
+    private final CommitLog commitLog;
     @Inject
-    private ReportPulsarClient pulsarClient;
+    ReportPulsarClient pulsarClient;
 
-    public String produce(byte[] report) {
-        try {
-            return pulsarClient.produceReport(report);
-        } catch (PulsarClientException e) {
-            log.error("reportService.produce encountered an error. Reason: " + e.getMessage());
-            throw new RuntimeException(e);
+    public ReportService() {
+        super();
+        commitLog = getConfig().getValue("commitlog", CommitLog.class);
+    }
+
+    public String produce(byte[] report) throws IOException {
+        switch (commitLog) {
+            case PULSAR:
+                return pulsarClient.produceReport(report);
+            default:
+                throw new RuntimeException(IMPLEMENTATION_MISSING);
         }
     }
 
-    public InputStream read(String messageKey) throws PulsarClientException {
-        try {
-            return pulsarClient.readReport(messageKey);
-        } catch (PulsarClientException e) {
-            log.error("reportService.read encountered an error. Reason: " + e.getMessage());
-            throw e;
+    public InputStream read(String messageKey) throws IOException {
+        switch (commitLog) {
+            case PULSAR:
+                return pulsarClient.readReport(messageKey);
+            default:
+                throw new RuntimeException(IMPLEMENTATION_MISSING);
         }
     }
 
     public void consume(OutputStream outputStream) throws IOException {
-        pulsarClient.consumeReports(outputStream);
+        switch (commitLog) {
+            case PULSAR:
+                pulsarClient.consumeReports(outputStream);
+            default:
+                throw new RuntimeException(IMPLEMENTATION_MISSING);
+        }
     }
 }

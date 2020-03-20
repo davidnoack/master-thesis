@@ -1,7 +1,5 @@
 package de.noack;
 
-import io.quarkus.test.junit.NativeImageTest;
-
 //@NativeImageTest
 public class NativeReportResourceIT extends ReportResourceTest {
 

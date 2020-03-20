@@ -16,10 +16,9 @@ import static org.apache.pulsar.client.api.CompressionType.LZ4;
 
 @RequestScoped
 public class ReportPulsarClient {
-    private static final Logger log = LoggerFactory.getLogger(ReportPulsarClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportPulsarClient.class);
     private static final String SERVICE_URL = "pulsar://localhost:6650";
     private static final String TOPIC_NAME = "report-vanilla";
-    private static final String SUBSCRIPTION_NAME = "report-vanilla-subscription";
 
     public String produceReport(byte[] report) throws PulsarClientException {
         // Create a Pulsar client instance. A single instance can be shared across many
@@ -37,12 +36,12 @@ public class ReportPulsarClient {
                     .create();
 
             // Once the producer is created, it can be used for the entire application life-cycle
-            log.info("Created producer for the topic {}", TOPIC_NAME);
+            LOGGER.info("Created producer for the topic {}", TOPIC_NAME);
 
             // Send each message and log message content and ID when successfully received
             String messageKey = String.valueOf(randomUUID());
             MessageId msgId = producer.newMessage().key(messageKey).value(report).send();
-            log.info("Published message with the ID {}", msgId);
+            LOGGER.info("Published message with the ID {}", msgId);
             return messageKey;
         }
     }
@@ -55,14 +54,14 @@ public class ReportPulsarClient {
                     .topic(TOPIC_NAME)
                     .startMessageId(MessageId.earliest)
                     .create();
-            log.info("Created reader for the topic {}", TOPIC_NAME);
+            LOGGER.info("Created reader for the topic {}", TOPIC_NAME);
             do {
                 Message<byte[]> message = reader.readNext(1, SECONDS);
                 if (messageKey.equals(message.getKey())) return new ByteArrayInputStream(message.getValue());
             } while (!reader.hasReachedEndOfTopic());
             throw new RuntimeException("Message with id " + messageKey + " not found!");
         } catch (PulsarClientException e) {
-            log.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw e;
         }
     }
@@ -75,7 +74,7 @@ public class ReportPulsarClient {
                     .topic(TOPIC_NAME)
                     .startMessageId(MessageId.earliest)
                     .create();
-            log.info("Created reader for the topic {}", TOPIC_NAME);
+            LOGGER.info("Created reader for the topic {}", TOPIC_NAME);
 
             do {
                 Message<byte[]> message = reader.readNext(1, SECONDS);
@@ -84,10 +83,10 @@ public class ReportPulsarClient {
                 } else return;
             } while (!reader.hasReachedEndOfTopic());
         } catch (PulsarClientException e) {
-            log.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw e;
         } catch (IOException e) {
-            log.error("Error writing to output stream" + e.getMessage());
+            LOGGER.error("Error writing to output stream" + e.getMessage());
             throw e;
         }
     }

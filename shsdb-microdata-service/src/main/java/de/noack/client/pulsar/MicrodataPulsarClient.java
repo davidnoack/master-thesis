@@ -20,11 +20,9 @@ import static org.apache.pulsar.client.api.CompressionType.LZ4;
 
 @ApplicationScoped
 public class MicrodataPulsarClient {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(MicrodataPulsarClient.class);
     @Inject
-    private MicrodataService microdataService;
-
-    private static final Logger log = LoggerFactory.getLogger(MicrodataPulsarClient.class);
+    MicrodataService microdataService;
     private static final String SERVICE_URL = "pulsar://localhost:6650";
     private static final String INPUT_TOPIC_NAME = "report-vanilla";
     private static final String INPUT_SUBSCRIPTION_NAME = "report-vanilla-subscription";
@@ -39,18 +37,18 @@ public class MicrodataPulsarClient {
             PulsarClient client = PulsarClient.builder()
                     .serviceUrl(SERVICE_URL)
                     .build();
-            log.info("Created client for service URL {}", SERVICE_URL);
+            LOGGER.info("Created client for service URL {}", SERVICE_URL);
             consumer = client.newConsumer()
                     .topic(INPUT_TOPIC_NAME)
                     .subscriptionType(SubscriptionType.Shared)
                     .subscriptionName(INPUT_SUBSCRIPTION_NAME)
                     .subscribe();
-            log.info("Created consumer for the topic {}", INPUT_TOPIC_NAME);
+            LOGGER.info("Created consumer for the topic {}", INPUT_TOPIC_NAME);
             producer = client.newProducer()
                     .topic(OUTPUT_TOPIC_NAME)
                     .compressionType(LZ4)
                     .create();
-            log.info("Created producer for the topic {}", OUTPUT_TOPIC_NAME);
+            LOGGER.info("Created producer for the topic {}", OUTPUT_TOPIC_NAME);
             consumeReports();
         } catch (IOException e) {
             e.printStackTrace();
@@ -71,12 +69,13 @@ public class MicrodataPulsarClient {
         do {
             // Wait until a message is available
             Message<byte[]> msg = consumer.receive();
-            log.info("Received message with ID {}", msg.getMessageId());
+            LOGGER.info("Received message with ID {}", msg.getMessageId());
 
             // Extract the message as a printable string and then log
             microdataService.setCurrentReport(msg.getValue());
             if (microdataService.reportIsValid()) {
-                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(microdataService.getCurrentReport())))) {
+                try (BufferedReader bufferedReader =
+                             new BufferedReader(new InputStreamReader(new ByteArrayInputStream(microdataService.getCurrentReport())))) {
                     // Remove header...
                     bufferedReader.readLine();
                     // Read the rest of the report
@@ -93,9 +92,9 @@ public class MicrodataPulsarClient {
         try {
             String messageKey = String.valueOf(randomUUID());
             MessageId msgId = producer.newMessage().key(messageKey).value(microdata.getBytes()).send();
-            log.info("Published message with the ID {}", msgId);
+            LOGGER.info("Published message with the ID {}", msgId);
         } catch (PulsarClientException e) {
-            log.error("Error occured during publishing message. Reason: {}", e.getMessage());
+            LOGGER.error("Error occured during publishing message. Reason: {}", e.getMessage());
         }
     }
 }
