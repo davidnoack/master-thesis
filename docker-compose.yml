@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+  standalone:
+    image: apachepulsar/pulsar:2.5.0
+    ports:
+      - "8080:8080"
+      - "6650:6650"
+    expose:
+      - 8080
+      - 6650
+    environment:
+      - PULSAR_MEM=" -Xms4G -Xmx4G -XX:MaxDirectMemorySize=8g"
+    command: >
+      /bin/bash -c
+      "bin/apply-config-from-env.py conf/standalone.conf
+      && bin/pulsar standalone"
+  pulsar-manager:
+    image: apachepulsar/pulsar-manager:v0.1.0
+    container_name: pulsar-manager
+    depends_on:
+      - standalone
+    ports:
+      - "9527:9527"
+    volumes:
+      - $PWD:/data
+    environment:
+      - REDIRECT_HOST=192.168.0.104
+      - REDIRECT_PORT=9527
+      - DRIVER_CLASS_NAME=org.postgresql.Driver
+      - URL='jdbc:postgresql://127.0.0.1:5432/pulsar_manager'
+      - USERNAME=pulsar
+      - PASSWORD=pulsar
+      - LOG_LEVEL=DEBUG
+    command: /bin/sh
