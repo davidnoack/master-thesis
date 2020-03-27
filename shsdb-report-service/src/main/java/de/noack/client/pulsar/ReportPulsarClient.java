@@ -1,10 +1,10 @@
 package de.noack.client.pulsar;
 
+import de.noack.client.ReportClient;
 import org.apache.pulsar.client.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.RequestScoped;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,12 +14,11 @@ import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.pulsar.client.api.CompressionType.LZ4;
 
-@RequestScoped
-public class ReportPulsarClient {
+public class ReportPulsarClient implements ReportClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportPulsarClient.class);
     private static final String SERVICE_URL = "pulsar://localhost:6650";
-    private static final String TOPIC_NAME = "report-vanilla";
 
+    @Override
     public String produceReport(byte[] report) throws PulsarClientException {
         // Create a Pulsar client instance. A single instance can be shared across many
         // producers and consumer within the same application
@@ -46,6 +45,7 @@ public class ReportPulsarClient {
         }
     }
 
+    @Override
     public InputStream readReport(String messageKey) throws PulsarClientException {
         try (PulsarClient client = PulsarClient.builder()
                 .serviceUrl(SERVICE_URL)
@@ -66,6 +66,7 @@ public class ReportPulsarClient {
         }
     }
 
+    @Override
     public void consumeReports(OutputStream outputStream) throws IOException {
         try (PulsarClient client = PulsarClient.builder()
                 .serviceUrl(SERVICE_URL)

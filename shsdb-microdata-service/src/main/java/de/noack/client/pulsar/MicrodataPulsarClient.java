@@ -21,12 +21,12 @@ import static org.apache.pulsar.client.api.CompressionType.LZ4;
 @ApplicationScoped
 public class MicrodataPulsarClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(MicrodataPulsarClient.class);
-    @Inject
-    MicrodataService microdataService;
     private static final String SERVICE_URL = "pulsar://localhost:6650";
     private static final String INPUT_TOPIC_NAME = "report-vanilla";
     private static final String INPUT_SUBSCRIPTION_NAME = "report-vanilla-subscription";
     private static final String OUTPUT_TOPIC_NAME = "report-microdata";
+    @Inject
+    MicrodataService microdataService;
     private Consumer<byte[]> consumer;
     private Producer<byte[]> producer;
     private boolean isApplicationRunning;
@@ -51,7 +51,7 @@ public class MicrodataPulsarClient {
             LOGGER.info("Created producer for the topic {}", OUTPUT_TOPIC_NAME);
             consumeReports();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Error occurred! Reason: {}", e.getMessage());
         }
     }
 
@@ -82,7 +82,6 @@ public class MicrodataPulsarClient {
                     bufferedReader.lines().forEach(this::produceMicrodata);
                 }
             }
-
             // Acknowledge processing of the message so that it can be deleted
             consumer.acknowledge(msg);
         } while (isApplicationRunning);

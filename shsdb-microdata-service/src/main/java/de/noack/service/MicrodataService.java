@@ -40,7 +40,7 @@ public class MicrodataService {
             if (isHeaderValid(bufferedReader.readLine())) {
                 return bufferedReader
                         .lines()
-                        .anyMatch(line -> line.replaceAll("[^" + DELIMITER + "]", "").length() != 17);
+                        .noneMatch(line -> line.replaceAll("[^" + DELIMITER + "]", "").length() != ReportingSchema.values().length - 1);
             }
         } catch (IOException e) {
             LOGGER.error("Error while reading byte array occurred. Reason: {}", e.getMessage());
