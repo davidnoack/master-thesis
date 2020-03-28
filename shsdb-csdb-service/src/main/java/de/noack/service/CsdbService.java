@@ -118,7 +118,7 @@ public class CsdbService {
         final Integer assetSecuritisationTypeColumn = columnOrder.get(ASSET_SECURIS_TYPE);
         final String assetSecuritisationType = assetSecuritisationTypeColumn == null || assetSecuritisationTypeColumn > maxArrayIndex ? null :
                 attributes[assetSecuritisationTypeColumn].trim();
-        csdb.setAssetSecuritisationType(assetSecuritisationType);
+        csdb.setAssetSecuritisationType(assetSecuritisationType != null && !assetSecuritisationType.isEmpty() ? assetSecuritisationType : null);
 
         final Integer averagePriceColumn = columnOrder.get(AVERAGE_PRICE);
         final String averagePriceString = averagePriceColumn == null || averagePriceColumn > maxArrayIndex ? null :
@@ -140,7 +140,7 @@ public class CsdbService {
 
         final Integer cfiColumn = columnOrder.get(CFI);
         final String cfiCode = cfiColumn == null || cfiColumn > maxArrayIndex ? null : attributes[cfiColumn].trim();
-        csdb.setCfiCode(cfiCode);
+        csdb.setCfiCode(cfiCode != null && !cfiCode.isEmpty() ? cfiCode : null);
 
         final Integer couponDateColumn = columnOrder.get(COUPON_DT);
         final String couponDateString = couponDateColumn == null || couponDateColumn > maxArrayIndex ? null : attributes[couponDateColumn].trim();
@@ -151,7 +151,7 @@ public class CsdbService {
         final Integer couponFrequencyColumn = columnOrder.get(COUPON_FREQUENCY2);
         final String couponFrequency = couponFrequencyColumn == null || couponFrequencyColumn > maxArrayIndex ? null :
                 attributes[couponFrequencyColumn].trim();
-        csdb.setCouponFrequency(couponFrequency);
+        csdb.setCouponFrequency(couponFrequency != null && !couponFrequency.isEmpty() ? couponFrequency : null);
 
         final Integer couponRateColumn = columnOrder.get(COUPON_RATE);
         final String couponRateString = couponRateColumn == null || couponRateColumn > maxArrayIndex ? null :
@@ -161,11 +161,11 @@ public class CsdbService {
 
         final Integer couponTypeColumn = columnOrder.get(COUPON_TYPE2);
         final String couponType = couponTypeColumn == null || couponTypeColumn > maxArrayIndex ? null : attributes[couponTypeColumn].trim();
-        csdb.setCouponType(couponType);
+        csdb.setCouponType(couponType != null && !couponType.isEmpty() ? couponType : null);
 
         final Integer debtTypeColumn = columnOrder.get(DEBT_TYPE2);
         final String debtType = debtTypeColumn == null || debtTypeColumn > maxArrayIndex ? null : attributes[debtTypeColumn].trim();
-        csdb.setDebtType(debtType);
+        csdb.setDebtType(debtType != null && !debtType.isEmpty() ? debtType : null);
 
         final Integer derivedIncomeEuroColumn = columnOrder.get(DERIVED_INCOME_EUR);
         final String derivedIncomeEuroString = derivedIncomeEuroColumn == null || derivedIncomeEuroColumn > maxArrayIndex ? null :
@@ -177,7 +177,7 @@ public class CsdbService {
         final Integer derivedIncomeFrequencyColumn = columnOrder.get(DERIVED_INCOME_FREQ);
         final String derivedIncomeFrequency = derivedIncomeFrequencyColumn == null || derivedIncomeFrequencyColumn > maxArrayIndex ? null :
                 attributes[derivedIncomeFrequencyColumn].trim();
-        csdb.setDerivedIncomeFrequency(derivedIncomeFrequency);
+        csdb.setDerivedIncomeFrequency(derivedIncomeFrequency != null && !derivedIncomeFrequency.isEmpty() ? derivedIncomeFrequency : null);
 
         final Integer dividendAmountColumn = columnOrder.get(DIV_AMOUNT);
         final String dividendAmountString = dividendAmountColumn == null || dividendAmountColumn > maxArrayIndex ? null :
@@ -189,7 +189,7 @@ public class CsdbService {
         final Integer dividendCurrencyColumn = columnOrder.get(DIV_CURRENCY);
         final String dividendCurrency = dividendCurrencyColumn == null || dividendCurrencyColumn > maxArrayIndex ? null :
                 attributes[dividendCurrencyColumn].trim();
-        csdb.setDividendCurrency(dividendCurrency);
+        csdb.setDividendCurrency(dividendCurrency != null && !dividendCurrency.isEmpty() ? dividendCurrency : null);
 
         final Integer dividendIncomeEuroColumn = columnOrder.get(DIV_INCOME_EUR);
         final String dividendIncomeEuroString = dividendIncomeEuroColumn == null || dividendIncomeEuroColumn > maxArrayIndex ? null :
@@ -201,7 +201,7 @@ public class CsdbService {
         final Integer dividendIncomeFrequencyColumn = columnOrder.get(DIV_FREQ);
         final String dividendIncomeFrequency = dividendIncomeFrequencyColumn == null || dividendIncomeFrequencyColumn > maxArrayIndex ? null :
                 attributes[dividendIncomeFrequencyColumn].trim();
-        csdb.setDividendIncomeFrequency(dividendIncomeFrequency);
+        csdb.setDividendIncomeFrequency(dividendIncomeFrequency != null && !dividendIncomeFrequency.isEmpty() ? dividendIncomeFrequency : null);
 
         final Integer dividendSettlementDateColumn = columnOrder.get(DIV_DT);
         final String dividendSettlementDateString = dividendSettlementDateColumn == null || dividendSettlementDateColumn > maxArrayIndex ? null :
@@ -212,31 +212,31 @@ public class CsdbService {
 
         final Integer divTypeColumn = columnOrder.get(DIV_TYPE);
         final String divType = divTypeColumn == null || divTypeColumn > maxArrayIndex ? null : attributes[divTypeColumn].trim();
-        csdb.setDivType(divType);
+        csdb.setDivType(divType != null && !divType.isEmpty() ? divType : null);
 
         final Integer inEADBColumn = columnOrder.get(IN_EADB);
         final String inEADB = inEADBColumn == null || inEADBColumn > maxArrayIndex ? null : attributes[inEADBColumn].trim();
-        csdb.setInEADB(inEADB);
+        csdb.setInEADB(inEADB != null && !inEADB.isEmpty() ? inEADB : null);
 
         final Integer instrumentClassColumn = columnOrder.get(ESA_INS_2010);
         final String instrumentClass = instrumentClassColumn == null || instrumentClassColumn > maxArrayIndex ? null :
                 attributes[instrumentClassColumn].trim();
-        csdb.setInstrumentClass(instrumentClass);
+        csdb.setInstrumentClass(instrumentClass != null && !instrumentClass.isEmpty() ? instrumentClass : null);
 
         final Integer instrumentClassESA95Column = columnOrder.get(ESA_INS);
         final String instrumentClassESA95 = instrumentClassESA95Column == null || instrumentClassESA95Column > maxArrayIndex ? null :
                 attributes[instrumentClassESA95Column].trim();
-        csdb.setInstrumentClassESA95(instrumentClassESA95);
+        csdb.setInstrumentClassESA95(instrumentClassESA95 != null && !instrumentClassESA95.isEmpty() ? instrumentClassESA95 : null);
 
         final Integer instrumentSeniorityTypeColumn = columnOrder.get(INS_SENIOR_TYPE);
         final String instrumentSeniorityType = instrumentSeniorityTypeColumn == null || instrumentSeniorityTypeColumn > maxArrayIndex ? null :
                 attributes[instrumentSeniorityTypeColumn].trim();
-        csdb.setInstrumentSeniorityType(instrumentSeniorityType);
+        csdb.setInstrumentSeniorityType(instrumentSeniorityType != null && !instrumentSeniorityType.isEmpty() ? instrumentSeniorityType : null);
 
         final Integer internalOrganisationCodeColumn = columnOrder.get(INT_ORG_CODE);
         final String internalOrganisationCode = internalOrganisationCodeColumn == null || internalOrganisationCodeColumn > maxArrayIndex ? null :
                 attributes[internalOrganisationCodeColumn].trim();
-        csdb.setInternalOrganisationCode(internalOrganisationCode);
+        csdb.setInternalOrganisationCode(internalOrganisationCode != null && !internalOrganisationCode.isEmpty() ? internalOrganisationCode : null);
 
         final Integer issueDateColumn = columnOrder.get(ISSUE_DT);
         final String issueDateString = issueDateColumn == null || issueDateColumn > maxArrayIndex ? null : attributes[issueDateColumn].trim();
@@ -252,41 +252,41 @@ public class CsdbService {
 
         final Integer issuerAreaColumn = columnOrder.get(ISSUER_COUNTRY);
         final String issuerArea = issuerAreaColumn == null || issuerAreaColumn > maxArrayIndex ? null : attributes[issuerAreaColumn].trim();
-        csdb.setIssuerArea(issuerArea);
+        csdb.setIssuerArea(issuerArea != null && !issuerArea.isEmpty() ? issuerArea : null);
 
         final Integer issuerESA95SectorColumn = columnOrder.get(ESA_ISSUER);
         final String issuerESA95Sector = issuerESA95SectorColumn == null || issuerESA95SectorColumn > maxArrayIndex ? null :
                 attributes[issuerESA95SectorColumn].trim();
-        csdb.setIssuerESA95Sector(issuerESA95Sector);
+        csdb.setIssuerESA95Sector(issuerESA95Sector != null && !issuerESA95Sector.isEmpty() ? issuerESA95Sector : null);
 
         final Integer issuerIDColumn = columnOrder.get(ISS_ID);
         final String issuerID = issuerIDColumn == null || issuerIDColumn > maxArrayIndex ? null : attributes[issuerIDColumn].trim();
-        csdb.setIssuerID(issuerID);
+        csdb.setIssuerID(issuerID != null && !issuerID.isEmpty() ? issuerID : null);
 
         final Integer issuerIDTypeColumn = columnOrder.get(ISS_ID_TYPE);
         final String issuerIDType = issuerIDTypeColumn == null || issuerIDTypeColumn > maxArrayIndex ? null : attributes[issuerIDTypeColumn].trim();
-        csdb.setIssuerIDType(issuerIDType);
+        csdb.setIssuerIDType(issuerIDType != null && !issuerIDType.isEmpty() ? issuerIDType : null);
 
         final Integer issuerLEIColumn = columnOrder.get(LEI);
         final String issuerLEI = issuerLEIColumn == null || issuerLEIColumn > maxArrayIndex ? null : attributes[issuerLEIColumn].trim();
-        csdb.setIssuerLEI(issuerLEI);
+        csdb.setIssuerLEI(issuerLEI != null && !issuerLEI.isEmpty() ? issuerLEI : null);
 
         final Integer issuerMFIColumn = columnOrder.get(MFI);
         final String issuerMFI = issuerMFIColumn == null || issuerMFIColumn > maxArrayIndex ? null : attributes[issuerMFIColumn].trim();
-        csdb.setIssuerMFI(issuerMFI);
+        csdb.setIssuerMFI(issuerMFI != null && !issuerMFI.isEmpty() ? issuerMFI : null);
 
         final Integer issuerNACESectorColumn = columnOrder.get(NACE);
         final String issuerNACESector = issuerNACESectorColumn == null || issuerNACESectorColumn > maxArrayIndex ? null :
                 attributes[issuerNACESectorColumn].trim();
-        csdb.setIssuerNACESector(issuerNACESector);
+        csdb.setIssuerNACESector(issuerNACESector != null && !issuerNACESector.isEmpty() ? issuerNACESector : null);
 
         final Integer issuerNameColumn = columnOrder.get(ISSUER_NAME);
         final String issuerName = issuerNameColumn == null || issuerNameColumn > maxArrayIndex ? null : attributes[issuerNameColumn].trim();
-        csdb.setIssuerName(issuerName);
+        csdb.setIssuerName(issuerName != null && !issuerName.isEmpty() ? issuerName : null);
 
         final Integer issuerSectorColumn = columnOrder.get(ESA_ISSUER_2010);
         final String issuerSector = issuerSectorColumn == null || issuerSectorColumn > maxArrayIndex ? null : attributes[issuerSectorColumn].trim();
-        csdb.setIssuerSector(issuerSector);
+        csdb.setIssuerSector(issuerSector != null && !issuerSector.isEmpty() ? issuerSector : null);
 
         final Integer marketCapitalisationColumn = columnOrder.get(MARKET_CAPITAL);
         final String marketCapitalisationString = marketCapitalisationColumn == null || marketCapitalisationColumn > maxArrayIndex ? null :
@@ -313,7 +313,7 @@ public class CsdbService {
         final Integer nominalCurrencyColumn = columnOrder.get(NOMINAL_CURRENCY);
         final String nominalCurrency = nominalCurrencyColumn == null || nominalCurrencyColumn > maxArrayIndex ? null :
                 attributes[nominalCurrencyColumn].trim();
-        csdb.setNominalCurrency(nominalCurrency);
+        csdb.setNominalCurrency(nominalCurrency != null && !nominalCurrency.isEmpty() ? nominalCurrency : null);
 
         final Integer nominalValueColumn = columnOrder.get(NOMINAL_VALUE);
         final String nominalValueString = nominalValueColumn == null || nominalValueColumn > maxArrayIndex ? null :
@@ -350,17 +350,18 @@ public class CsdbService {
         final Integer priceValueTypeColumn = columnOrder.get(PRICE_VT);
         final String priceValueType = priceValueTypeColumn == null || priceValueTypeColumn > maxArrayIndex ? null :
                 attributes[priceValueTypeColumn].trim();
-        csdb.setPriceValueType(priceValueType);
+        csdb.setPriceValueType(priceValueType != null && !priceValueType.isEmpty() ? priceValueType : null);
 
         final Integer primaryAssetClassificationColumn = columnOrder.get(PRIMARY_ASSET_CLASS);
         final String primaryAssetClassification = primaryAssetClassificationColumn == null || primaryAssetClassificationColumn > maxArrayIndex ?
                 null : attributes[primaryAssetClassificationColumn].trim();
-        csdb.setPrimaryAssetClassification(primaryAssetClassification);
+        csdb.setPrimaryAssetClassification(primaryAssetClassification != null && !primaryAssetClassification.isEmpty() ?
+                primaryAssetClassification : null);
 
         final Integer quotationBasisColumn = columnOrder.get(QUOTATION_BASIS);
         final String quotationBasis = quotationBasisColumn == null || quotationBasisColumn > maxArrayIndex ? null :
                 attributes[quotationBasisColumn].trim();
-        csdb.setQuotationBasis(quotationBasis);
+        csdb.setQuotationBasis(quotationBasis != null && !quotationBasis.isEmpty() ? quotationBasis : null);
 
         final Integer redemptionPriceColumn = columnOrder.get(REDEMPTION_PRICE);
         final String redemptionPriceString = redemptionPriceColumn == null || redemptionPriceColumn > maxArrayIndex ? null :
@@ -372,7 +373,7 @@ public class CsdbService {
         final Integer securityStatusColumn = columnOrder.get(SEC_STATUS);
         final String securityStatus = securityStatusColumn == null || securityStatusColumn > maxArrayIndex ? null :
                 attributes[securityStatusColumn].trim();
-        csdb.setSecurityStatus(securityStatus);
+        csdb.setSecurityStatus(securityStatus != null && !securityStatus.isEmpty() ? securityStatus : null);
 
         final Integer securityStatusDateColumn = columnOrder.get(SEC_STATUS_DT);
         final String securityStatusDateString = securityStatusDateColumn == null || securityStatusDateColumn > maxArrayIndex ? null :
@@ -383,7 +384,7 @@ public class CsdbService {
 
         final Integer shortNameColumn = columnOrder.get(SHORT_NAME);
         final String shortName = shortNameColumn == null || shortNameColumn > maxArrayIndex ? null : attributes[shortNameColumn].trim();
-        csdb.setShortName(shortName);
+        csdb.setShortName(shortName != null && !shortName.isEmpty() ? shortName : null);
 
         final Integer splitDateColumn = columnOrder.get(SPLIT_DT);
         final String splitDateString = splitDateColumn == null || splitDateColumn > maxArrayIndex ? null : attributes[splitDateColumn].trim();
