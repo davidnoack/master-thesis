@@ -5,6 +5,7 @@ import org.apache.pulsar.client.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.RequestScoped;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.pulsar.client.api.CompressionType.LZ4;
 
+@RequestScoped
 public class ReportPulsarClient implements ReportClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportPulsarClient.class);
     private static final String SERVICE_URL = "pulsar://localhost:6650";

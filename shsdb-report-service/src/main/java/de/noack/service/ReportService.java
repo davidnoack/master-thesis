@@ -3,22 +3,24 @@ package de.noack.service;
 import de.noack.client.ReportClient;
 import de.noack.client.kafka.ReportKafkaClient;
 import de.noack.client.pulsar.ReportPulsarClient;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 
 @RequestScoped
 public class ReportService {
     private static final String IMPLEMENTATION_MISSING = "Not yet implemented!";
     private ReportClient reportClient;
 
-    public ReportService() {
+    @Inject
+    public ReportService(@ConfigProperty(name = "commitlog") final CommitLog commitLog) {
         super();
-        switch (getConfig().getValue("commitlog", CommitLog.class)) {
+        switch (commitLog) {
             case PULSAR:
                 reportClient = new ReportPulsarClient();
                 break;

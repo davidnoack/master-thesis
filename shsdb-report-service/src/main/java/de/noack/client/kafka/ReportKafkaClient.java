@@ -10,6 +10,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.RequestScoped;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 // TODO:
+@RequestScoped
 public class ReportKafkaClient implements ReportClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportKafkaClient.class);
     private static final String SERVICE_URL = "localhost:9092";
