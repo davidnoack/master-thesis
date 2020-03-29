@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface ReportClient {
-    String TOPIC_NAME = "report-vanilla";
+    String TOPIC_NAME = "public/longterm/report-vanilla";
 
     String produceReport(byte[] report) throws IOException;
 

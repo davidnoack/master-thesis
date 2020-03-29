@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.util.Set;
 
 public interface CsdbClient {
-    String INPUT_TOPIC_NAME = "csdb-vanilla";
+    String INPUT_TOPIC_NAME = "public/longterm/csdb-vanilla";
     String OUTPUT_TOPIC_NAME = "csdb-amended";
 
     String produceCsdb(CSDB csdb) throws IOException;
