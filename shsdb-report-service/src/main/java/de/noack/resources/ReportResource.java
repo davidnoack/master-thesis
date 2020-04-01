@@ -1,5 +1,6 @@
 package de.noack.resources;
 
+import de.noack.model.ReportedData;
 import de.noack.service.ReportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,8 +9,8 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
 import java.net.URI;
+import java.util.Set;
 
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.*;
@@ -28,12 +29,11 @@ public class ReportResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportResource.class);
 
     @Inject
-    ReportService reportService;
+    private ReportService reportService;
 
     @POST
     @Consumes({APPLICATION_OCTET_STREAM, "text/csv"})
-    @Produces(APPLICATION_JSON)
-    public Response createReport(byte[] content) {
+    public Response createVanillaReport(byte[] content) {
         try {
             String messageKey = reportService.produce(content);
             return created(new URI(SERVICE_URI + messageKey)).build();
@@ -47,15 +47,10 @@ public class ReportResource {
 
     @GET
     @Path("{id}")
-    @Produces({APPLICATION_OCTET_STREAM, TEXT_PLAIN})
+    @Produces(TEXT_PLAIN)
     public Response getReport(@PathParam("id") String messageKey) {
         try {
-            return ok(reportService.read(messageKey), APPLICATION_OCTET_STREAM).build();
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-            return serverError()
-                    .entity(entity(e.getMessage(), TEXT_PLAIN))
-                    .build();
+            return ok(reportService.findVanillaReport(messageKey), APPLICATION_OCTET_STREAM).build();
         } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
@@ -65,11 +60,26 @@ public class ReportResource {
     }
 
     @GET
-    @Produces({APPLICATION_OCTET_STREAM, TEXT_PLAIN})
+    @Produces(TEXT_PLAIN)
     public Response getReports() {
         try {
-            StreamingOutput stream = reportService::consume;
+            StreamingOutput stream = reportService::allVanillaReports;
             return ok(stream).build();
+        } catch (RuntimeException e) {
+            LOGGER.error(e.getMessage());
+            return status(NOT_FOUND)
+                    .entity(entity(e.getMessage(), TEXT_PLAIN))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("transformed")
+    @Produces({APPLICATION_JSON, TEXT_PLAIN})
+    public Response getTransformedReports() {
+        try {
+            Set<ReportedData> data = reportService.allTransformedReports();
+            return ok(data).build();
         } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)

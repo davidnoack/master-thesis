@@ -1,14 +1,13 @@
 package de.noack.client.kafka;
 
 import de.noack.client.ReportClient;
+import de.noack.model.ReportedData;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import java.io.IOException;
@@ -16,13 +15,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 // TODO:
 @RequestScoped
 public class ReportKafkaClient implements ReportClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportKafkaClient.class);
     private static final String SERVICE_URL = "localhost:9092";
 
     public static Producer<String, String> createProducer() {
@@ -49,7 +48,7 @@ public class ReportKafkaClient implements ReportClient {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_EARLIER);
 
         final Consumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Collections.singletonList(TOPIC_NAME));
+        consumer.subscribe(Collections.singletonList(VANILLA_TOPIC_NAME));
         return consumer;
     }
 
@@ -71,12 +70,22 @@ public class ReportKafkaClient implements ReportClient {
     }
 
     @Override
-    public InputStream readReport(String messageKey) throws IOException {
+    public InputStream findVanillaReport(String messageKey) {
         return null;
     }
 
     @Override
-    public void consumeReports(OutputStream outputStream) throws IOException {
+    public void allVanillaReports(OutputStream outputStream) {
+
+    }
+
+    @Override
+    public Set<ReportedData> allTransformedReports() {
+        return null;
+    }
+
+    @Override
+    public void produceTransformedReports() throws IOException {
 
     }
 }

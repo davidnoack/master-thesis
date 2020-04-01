@@ -48,7 +48,7 @@ public class CsdbResource {
 
     @GET
     @Path("{id}")
-    @Produces({APPLICATION_OCTET_STREAM, TEXT_PLAIN})
+    @Produces(APPLICATION_JSON)
     public Response getCsdb(@PathParam("id") String messageKey) {
         try {
             return ok(csdbService.read(messageKey), APPLICATION_OCTET_STREAM).build();

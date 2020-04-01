@@ -18,7 +18,6 @@ import static org.apache.pulsar.client.api.CompressionType.LZ4;
 public class CsdbPulsarClient implements CsdbClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(CsdbPulsarClient.class);
     private static final String SERVICE_URL = "pulsar://localhost:6650";
-    private static final String INPUT_SUBSCRIPTION_NAME = "csdb-vanilla-subscription";
     private Consumer<CSDB> consumer;
     private Producer<CSDB> producer;
 
@@ -71,7 +70,7 @@ public class CsdbPulsarClient implements CsdbClient {
                     .topic(OUTPUT_TOPIC_NAME)
                     .startMessageId(MessageId.earliest)
                     .create();
-            LOGGER.info("Created reader for the topic {}", INPUT_TOPIC_NAME);
+            LOGGER.info("Created reader for the topic {}", OUTPUT_TOPIC_NAME);
             do {
                 Message<CSDB> message = reader.readNext(1, SECONDS);
                 if (message != null) {
