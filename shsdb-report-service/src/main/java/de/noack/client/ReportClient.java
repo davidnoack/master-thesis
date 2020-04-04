@@ -29,6 +29,18 @@ public interface ReportClient {
     String VANILLA_SUBSCRIPTION_NAME = "reports-vanilla-subscription";
     String TRANSFORMED_TOPIC_NAME = "reports-transformed";
 
+    String produceVanillaReport(final byte[] report) throws IOException;
+
+    InputStream findVanillaReport(final String messageKey);
+
+    void allVanillaReports(final OutputStream outputStream);
+
+    Set<ReportedData> allTransformedReports();
+
+    void produceTransformedReport() throws IOException;
+
+    ReportedData findTransformedReport(final String messageKey);
+
     static ReportedData createTransformedReport(final String csvLine, final Map<ReportingSchema, Integer> columnOrder) {
         final String[] attributes = csvLine.split(CSV_DELIMITER);
         final int maxArrayIndex = attributes.length - 1;
@@ -130,16 +142,6 @@ public interface ReportClient {
         return reportedData;
     }
 
-    String produceVanillaReport(final byte[] report) throws IOException;
-
-    InputStream findVanillaReport(final String messageKey);
-
-    void allVanillaReports(final OutputStream outputStream);
-
-    Set<ReportedData> allTransformedReports();
-
-    void produceTransformedReport() throws IOException;
-
     static boolean reportIsValid(byte[] currentReport) {
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(currentReport)))) {
             // Only count delimiters of all lines if header is valid.
@@ -161,6 +163,4 @@ public interface ReportClient {
                 .collect(joining(CSV_DELIMITER))
                 .equals(header);
     }
-
-    ReportedData findTransformedReport(final String messageKey);
 }

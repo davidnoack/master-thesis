@@ -46,7 +46,7 @@ public class ReportResource {
 
     @GET
     @Produces(TEXT_PLAIN)
-    public Response getReports() {
+    public Response getVanillaReports() {
         try {
             final StreamingOutput stream = reportService::allVanillaReports;
             return ok(stream).build();
@@ -61,7 +61,7 @@ public class ReportResource {
     @GET
     @Path("{id}")
     @Produces(TEXT_PLAIN)
-    public Response getReport(@PathParam("id") String messageKey) {
+    public Response getVanillaReport(@PathParam("id") String messageKey) {
         try {
             return ok(reportService.findVanillaReport(messageKey), APPLICATION_OCTET_STREAM).build();
         } catch (RuntimeException e) {

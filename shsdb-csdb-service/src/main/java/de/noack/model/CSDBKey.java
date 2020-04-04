@@ -17,4 +17,11 @@ public class CSDBKey {
     private Integer period;
     @NonNull
     private Integer version;
+
+    @Override
+    public String toString() {
+        return identifier
+                + "+" + period
+                + "+" + version;
+    }
 }
