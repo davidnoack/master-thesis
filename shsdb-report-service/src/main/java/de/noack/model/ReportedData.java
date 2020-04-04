@@ -8,6 +8,13 @@ import org.apache.pulsar.shade.com.fasterxml.jackson.annotation.JsonIgnoreProper
 
 import java.math.BigDecimal;
 
+/**
+ * This class defines holdings data sector-wise which have been transformed from the input format (CSV or XML), reported by reporting agents. One
+ * dataset consists of a key, represented by {@link ReportedDataKey} and certain mandatory attributes (annotated with {@link NonNull} as well as
+ * some optional attributes, such as the nominal currency and the reporting basis of a security which can be obtained via the CSDB.
+ *
+ * @author davidnoack
+ */
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor

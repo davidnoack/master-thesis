@@ -53,7 +53,7 @@ public class ReportKafkaClient implements ReportClient {
     }
 
     @Override
-    public String produceReport(byte[] report) throws IOException {
+    public String produceVanillaReport(byte[] report) throws IOException {
         Producer<String, String> producer = createProducer();
         final ProducerRecord<String, String> record = new ProducerRecord<>(String.valueOf(UUID.randomUUID()),
                 new String(report));
@@ -85,7 +85,12 @@ public class ReportKafkaClient implements ReportClient {
     }
 
     @Override
-    public void produceTransformedReports() throws IOException {
+    public void produceTransformedReport() throws IOException {
 
+    }
+
+    @Override
+    public ReportedData findTransformedReport(String messageKey) {
+        return null;
     }
 }

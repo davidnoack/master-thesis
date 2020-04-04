@@ -6,6 +6,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.pulsar.shade.com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * This class represents the unique key of one dataset of reported holdings data. All attributes are mandatory.
+ *
+ * @author davidnoack
+ */
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
@@ -31,4 +36,18 @@ public class ReportedDataKey {
     private String amountType;
     @NonNull
     private String valuation;
+
+    @Override
+    public String toString() {
+        return compilingOrg
+                + "+" + period
+                + "+" + frequency
+                + "+" + isin
+                + "+" + holderSector
+                + "+" + source
+                + "+" + holderArea
+                + "+" + functionalCategory
+                + "+" + amountType
+                + "+" + valuation;
+    }
 }

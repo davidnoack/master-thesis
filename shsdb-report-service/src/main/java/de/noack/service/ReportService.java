@@ -41,18 +41,22 @@ public class ReportService {
     }
 
     public String produce(byte[] report) throws IOException {
-        return reportClient.produceReport(report);
+        return reportClient.produceVanillaReport(report);
     }
 
-    public InputStream findVanillaReport(String messageKey) {
+    public InputStream findVanillaReport(final String messageKey) {
         return reportClient.findVanillaReport(messageKey);
     }
 
-    public void allVanillaReports(OutputStream outputStream) {
+    public void allVanillaReports(final OutputStream outputStream) {
         reportClient.allVanillaReports(outputStream);
     }
 
     public Set<ReportedData> allTransformedReports() {
         return reportClient.allTransformedReports();
+    }
+
+    public ReportedData findTransformedReport(final String messageKey) {
+        return reportClient.findTransformedReport(messageKey);
     }
 }

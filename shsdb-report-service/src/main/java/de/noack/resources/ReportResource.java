@@ -1,6 +1,5 @@
 package de.noack.resources;
 
-import de.noack.model.ReportedData;
 import de.noack.service.ReportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.net.URI;
-import java.util.Set;
 
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.*;
@@ -19,7 +17,8 @@ import static javax.ws.rs.core.Response.*;
 
 /**
  * This resource serves all reports of SHSDB retrieved within the last five years. Posted Reports will be persisted to a commit log selected within
- * the application properties.
+ * the application properties. One report can be retrieved in a transformed way or as raw data. One dataset can only be accessed when it has been
+ * transformed to JSON beforehand.
  *
  * @author davidnoack
  */
@@ -35,11 +34,25 @@ public class ReportResource {
     @Consumes({APPLICATION_OCTET_STREAM, "text/csv"})
     public Response createVanillaReport(byte[] content) {
         try {
-            String messageKey = reportService.produce(content);
+            final String messageKey = reportService.produce(content);
             return created(new URI(SERVICE_URI + messageKey)).build();
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return serverError()
+                    .entity(entity(e.getMessage(), TEXT_PLAIN))
+                    .build();
+        }
+    }
+
+    @GET
+    @Produces(TEXT_PLAIN)
+    public Response getReports() {
+        try {
+            final StreamingOutput stream = reportService::allVanillaReports;
+            return ok(stream).build();
+        } catch (RuntimeException e) {
+            LOGGER.error(e.getMessage());
+            return status(NOT_FOUND)
                     .entity(entity(e.getMessage(), TEXT_PLAIN))
                     .build();
         }
@@ -60,11 +73,11 @@ public class ReportResource {
     }
 
     @GET
-    @Produces(TEXT_PLAIN)
-    public Response getReports() {
+    @Path("transformed")
+    @Produces({APPLICATION_JSON, TEXT_PLAIN})
+    public Response getTransformedReports() {
         try {
-            StreamingOutput stream = reportService::allVanillaReports;
-            return ok(stream).build();
+            return ok(reportService.allTransformedReports()).build();
         } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
@@ -74,12 +87,11 @@ public class ReportResource {
     }
 
     @GET
-    @Path("transformed")
+    @Path("transformed/{id}")
     @Produces({APPLICATION_JSON, TEXT_PLAIN})
-    public Response getTransformedReports() {
+    public Response getTransformedReport(@PathParam("id") final String messageKey) {
         try {
-            Set<ReportedData> data = reportService.allTransformedReports();
-            return ok(data).build();
+            return ok(reportService.findTransformedReport(messageKey)).build();
         } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)

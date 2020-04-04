@@ -15,36 +15,19 @@ import static de.noack.model.ReportingSchema.*;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
+/**
+ * This interface encapsulates all functionality to be provided by a report client, independent of its commit log technology. It defines the Topic
+ * Strings "reports-vanilla" as well as "reports-transformed" with its namespaces and subscription names to use. Furthermore it contains the logic
+ * to transform Reports from a byte array to {@link ReportedData} Objects including CSV-header validation.
+ *
+ * @author davidnoack
+ */
 public interface ReportClient {
     Logger LOGGER = LoggerFactory.getLogger(ReportClient.class);
     String CSV_DELIMITER = ";";
     String VANILLA_TOPIC_NAME = "public/longterm/reports-vanilla";
     String VANILLA_SUBSCRIPTION_NAME = "reports-vanilla-subscription";
     String TRANSFORMED_TOPIC_NAME = "reports-transformed";
-
-    String produceReport(byte[] report) throws IOException;
-
-    static boolean reportIsValid(byte[] currentReport) {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(currentReport)))) {
-            // Only count delimiters of all lines if header is valid.
-            if (isHeaderValid(bufferedReader.readLine())) {
-                return bufferedReader
-                        .lines()
-                        .noneMatch(line -> line.replaceAll("[^" + CSV_DELIMITER + "]", "").length() != ReportingSchema.values().length - 1);
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error while reading byte array occurred. Reason: {}", e.getMessage());
-            return false;
-        }
-        return false;
-    }
-
-    static boolean isHeaderValid(String header) {
-        return stream(ReportingSchema.values())
-                .map(ReportingSchema::name)
-                .collect(joining(CSV_DELIMITER))
-                .equals(header);
-    }
 
     static ReportedData createTransformedReport(final String csvLine, final Map<ReportingSchema, Integer> columnOrder) {
         final String[] attributes = csvLine.split(CSV_DELIMITER);
@@ -59,10 +42,10 @@ public interface ReportClient {
         final String periodIntegerString;
         if (periodString != null && periodString.contains("Q")) {
             final Integer quarter = Integer.parseInt(periodString.substring(6));
-            if (quarter == 4) periodIntegerString = periodString.substring(0, 3) + "12";
-            else periodIntegerString = periodString.substring(0, 3) + "0" + quarter * 3;
+            if (quarter == 4) periodIntegerString = periodString.substring(0, 4) + "12";
+            else periodIntegerString = periodString.substring(0, 4) + "0" + quarter * 3;
         } else {
-            periodIntegerString = periodString.substring(0, 3) + periodString.substring(6);
+            periodIntegerString = periodString.substring(0, 4) + periodString.substring(6);
         }
         final Integer period = Integer.parseInt(periodIntegerString);
 
@@ -125,17 +108,17 @@ public interface ReportClient {
         final Integer nominalCurrencyColumn = columnOrder.get(NOM_CURR);
         final String nominalCurrency = nominalCurrencyColumn == null || nominalCurrencyColumn > maxArrayIndex ? null :
                 attributes[nominalCurrencyColumn].trim();
-        reportedData.setNominalCurrency(nominalCurrency);
+        reportedData.setNominalCurrency(nominalCurrency != null && !nominalCurrency.isEmpty() ? nominalCurrency : null);
 
         final Integer reportingBasisColumn = columnOrder.get(REPORTING_BASIS);
         final String reportingBasis = reportingBasisColumn == null || reportingBasisColumn > maxArrayIndex ? null :
                 attributes[reportingBasisColumn].trim();
-        reportedData.setNominalCurrency(reportingBasis);
+        reportedData.setReportingBasis(reportingBasis != null && !reportingBasis.isEmpty() ? reportingBasis : null);
 
         final Integer confidentialityStatusColumn = columnOrder.get(CONF_STATUS);
         final String confidentialityStatus = confidentialityStatusColumn == null || confidentialityStatusColumn > maxArrayIndex ? null :
                 attributes[confidentialityStatusColumn].trim();
-        reportedData.setNominalCurrency(confidentialityStatus);
+        reportedData.setConfidentialityStatus(confidentialityStatus != null && !confidentialityStatus.isEmpty() ? confidentialityStatus : null);
 
         final Integer confidentialityAmountColumn = columnOrder.get(CONF_AMOUNT);
         final String confidentialityAmountString = confidentialityAmountColumn == null || confidentialityAmountColumn > maxArrayIndex ? null :
@@ -147,11 +130,37 @@ public interface ReportClient {
         return reportedData;
     }
 
-    InputStream findVanillaReport(String messageKey);
+    String produceVanillaReport(final byte[] report) throws IOException;
 
-    void allVanillaReports(OutputStream outputStream);
+    InputStream findVanillaReport(final String messageKey);
+
+    void allVanillaReports(final OutputStream outputStream);
 
     Set<ReportedData> allTransformedReports();
 
-    void produceTransformedReports() throws IOException;
+    void produceTransformedReport() throws IOException;
+
+    static boolean reportIsValid(byte[] currentReport) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(currentReport)))) {
+            // Only count delimiters of all lines if header is valid.
+            if (isHeaderValid(bufferedReader.readLine())) {
+                return bufferedReader
+                        .lines()
+                        .noneMatch(line -> line.replaceAll("[^" + CSV_DELIMITER + "]", "").length() != ReportingSchema.values().length - 1);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error while reading byte array occurred. Reason: {}", e.getMessage());
+            return false;
+        }
+        return false;
+    }
+
+    static boolean isHeaderValid(String header) {
+        return stream(ReportingSchema.values())
+                .map(ReportingSchema::name)
+                .collect(joining(CSV_DELIMITER))
+                .equals(header);
+    }
+
+    ReportedData findTransformedReport(final String messageKey);
 }

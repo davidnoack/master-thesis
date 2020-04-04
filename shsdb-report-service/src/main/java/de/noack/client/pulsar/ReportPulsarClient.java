@@ -23,6 +23,15 @@ import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.pulsar.client.api.CompressionType.LZ4;
 
+/**
+ * This class represents a implementation of {@link ReportClient} with usage of an Apache Pulsar commit log. It represents a {@link Consumer} as well
+ * as a {@link Producer} for records. It reads and produces from and to the topic "reports-vanilla" which contains all non-manipulated reported
+ * data. From this topic it also consumes and transforms messages to produce records for the topic "reports-transformed". {@link Consumer}s and
+ * {@link Producer}s are running as long as the application is running to maintain one connection each. It uses {@link Reader} to query produced
+ * records and deliver them via the resource {@link de.noack.resources.ReportResource}.
+ *
+ * @author davidnoack
+ */
 @ApplicationScoped
 public class ReportPulsarClient implements ReportClient {
     private static final String SERVICE_URL = "pulsar://localhost:6650";
@@ -55,9 +64,9 @@ public class ReportPulsarClient implements ReportClient {
                     .compressionType(LZ4)
                     .create();
             LOGGER.info("Created producer for the topic {}", TRANSFORMED_TOPIC_NAME);
-            produceTransformedReports();
+            produceTransformedReport();
         } catch (IOException e) {
-            LOGGER.error("Error occurred! Reason: {}", e.getMessage());
+            LOGGER.error("Error occurred during startup! Reason: {}", e.getMessage());
         }
     }
 
@@ -66,40 +75,27 @@ public class ReportPulsarClient implements ReportClient {
         try {
             vanillaProducer.close();
             vanillaConsumer.close();
+            transformedProducer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Error occurred during close! Reason: {}", e.getMessage());
         }
     }
 
     @Override
-    public String produceReport(byte[] report) throws PulsarClientException {
+    public String produceVanillaReport(final byte[] report) throws PulsarClientException {
         // Send each message and log message content and ID when successfully received
-        String messageKey = String.valueOf(randomUUID());
-        MessageId msgId = vanillaProducer.newMessage().key(messageKey).value(report).send();
+        final String messageKey = String.valueOf(randomUUID());
+        final MessageId msgId = vanillaProducer.newMessage().key(messageKey).value(report).send();
         LOGGER.info("Published message with the ID {}", msgId);
         return messageKey;
     }
 
     @Override
-    public InputStream findVanillaReport(String messageKey) {
-        try (Reader<byte[]> reader = client.newReader().topic(VANILLA_TOPIC_NAME)
+    public void allVanillaReports(final OutputStream outputStream) {
+        try (final Reader<byte[]> reader = client.newReader().topic(VANILLA_TOPIC_NAME)
                 .startMessageId(MessageId.earliest)
                 .create()) {
-            while (!reader.hasReachedEndOfTopic()) {
-                Message<byte[]> message = reader.readNext(1, SECONDS);
-                if (messageKey.equals(message.getKey())) return new ByteArrayInputStream(message.getValue());
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error during read occurred. Reason: {}", e.getMessage());
-        }
-        throw new RuntimeException("Message with id " + messageKey + " not found!");
-    }
-
-    @Override
-    public void allVanillaReports(OutputStream outputStream) {
-        try (Reader<byte[]> reader = client.newReader().topic(VANILLA_TOPIC_NAME)
-                .startMessageId(MessageId.earliest)
-                .create()) {
+            LOGGER.info("Created reader for the topic {}", VANILLA_TOPIC_NAME);
             while (!reader.hasReachedEndOfTopic()) {
                 Message<byte[]> message = reader.readNext(1, SECONDS);
                 if (message != null) {
@@ -107,35 +103,28 @@ public class ReportPulsarClient implements ReportClient {
                 } else return;
             }
         } catch (IOException e) {
-            LOGGER.error("Error during read occurred. Reason: {}", e.getMessage());
+            LOGGER.error("Error during reading from topic {} occurred. Reason: {}", VANILLA_TOPIC_NAME, e.getMessage());
         }
     }
 
     @Override
-    public Set<ReportedData> allTransformedReports() {
-        Set<ReportedData> result = new HashSet<>();
-        try (PulsarClient client = PulsarClient.builder()
-                .serviceUrl(SERVICE_URL)
-                .build()) {
-            Reader<ReportedData> reader = client.newReader(JSONSchema.of(ReportedData.class))
-                    .topic(TRANSFORMED_TOPIC_NAME)
-                    .startMessageId(MessageId.earliest)
-                    .create();
-            LOGGER.info("Created reader for the topic {}", TRANSFORMED_TOPIC_NAME);
-            do {
-                Message<ReportedData> message = reader.readNext(1, SECONDS);
-                if (message != null) {
-                    result.add(message.getValue());
-                } else break;
-            } while (!reader.hasReachedEndOfTopic());
-        } catch (PulsarClientException e) {
-            LOGGER.error(e.getMessage());
+    public InputStream findVanillaReport(final String messageKey) {
+        try (final Reader<byte[]> reader = client.newReader().topic(VANILLA_TOPIC_NAME)
+                .startMessageId(MessageId.earliest)
+                .create()) {
+            LOGGER.info("Created reader for the topic {}", VANILLA_TOPIC_NAME);
+            while (!reader.hasReachedEndOfTopic()) {
+                Message<byte[]> message = reader.readNext(1, SECONDS);
+                if (messageKey.equals(message.getKey())) return new ByteArrayInputStream(message.getValue());
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error during reading from topic {} occurred. Reason: {}", VANILLA_TOPIC_NAME, e.getMessage());
         }
-        return result;
+        throw new RuntimeException("Message with id " + messageKey + " not found!");
     }
 
     @Override
-    public void produceTransformedReports() throws IOException {
+    public void produceTransformedReport() throws IOException {
         while (isApplicationRunning) {
             // Wait until a message is available
             Message<byte[]> msg = vanillaConsumer.receive();
@@ -147,10 +136,11 @@ public class ReportPulsarClient implements ReportClient {
                     final String firstLine = bufferedReader.readLine();
                     final String[] csvAttributes = firstLine.split(CSV_DELIMITER);
                     final Map<ReportingSchema, Integer> columnOrder = new LinkedHashMap<>();
+                    // Find out order of column headers
                     for (int i = 0; i < csvAttributes.length; i++) {
                         columnOrder.put(ReportingSchema.valueOf(csvAttributes[i]), i);
                     }
-                    // Read the rest of the report
+                    // Read the data of the report
                     bufferedReader.lines().forEach(line -> {
                         try {
                             ReportedData reportedData = createTransformedReport(line, columnOrder);
@@ -163,8 +153,44 @@ public class ReportPulsarClient implements ReportClient {
                     });
                 }
             }
-            // Acknowledge processing of the message so that it can be deleted
+            // Acknowledge processing of the message
             vanillaConsumer.acknowledge(msg);
         }
+    }
+
+    @Override
+    public Set<ReportedData> allTransformedReports() {
+        Set<ReportedData> result = new HashSet<>();
+        try (final Reader<ReportedData> reader = client.newReader(JSONSchema.of(ReportedData.class))
+                .topic(TRANSFORMED_TOPIC_NAME)
+                .startMessageId(MessageId.earliest)
+                .create()) {
+            LOGGER.info("Created reader for the topic {}", TRANSFORMED_TOPIC_NAME);
+            do {
+                Message<ReportedData> message = reader.readNext(1, SECONDS);
+                if (message != null) {
+                    result.add(message.getValue());
+                } else break;
+            } while (!reader.hasReachedEndOfTopic());
+        } catch (IOException e) {
+            LOGGER.error("Error during reading from topic {} occurred. Reason: {}", TRANSFORMED_TOPIC_NAME, e.getMessage());
+        }
+        return result;
+    }
+
+    @Override
+    public ReportedData findTransformedReport(String messageKey) {
+        try (final Reader<ReportedData> reader = client.newReader(JSONSchema.of(ReportedData.class)).topic(TRANSFORMED_TOPIC_NAME)
+                .startMessageId(MessageId.earliest)
+                .create()) {
+            LOGGER.info("Created reader for the topic {}", TRANSFORMED_TOPIC_NAME);
+            while (!reader.hasReachedEndOfTopic()) {
+                Message<ReportedData> message = reader.readNext(1, SECONDS);
+                if (messageKey.equals(message.getKey())) return message.getValue();
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error during reading from topic {} occurred. Reason: {}", TRANSFORMED_TOPIC_NAME, e.getMessage());
+        }
+        throw new RuntimeException("Message with id " + messageKey + " not found!");
     }
 }
