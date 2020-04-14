@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import java.io.InputStream;
 import java.net.URI;
 
 import static javax.ws.rs.client.Entity.entity;
@@ -31,7 +32,7 @@ public class CsdbResource {
     private CsdbService csdbService;
 
     @POST
-    @Consumes({APPLICATION_OCTET_STREAM, "text/csv"})
+    @Consumes({"application/gzip", "text/csv"})
     public Response createVanillaCsdb(byte[] content) {
         try {
             final String messageKey = csdbService.produce(content);
@@ -67,6 +68,21 @@ public class CsdbResource {
         } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
+                    .entity(entity(e.getMessage(), TEXT_PLAIN))
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("transformed")
+    @Consumes({"application/gzip", "text/csv"})
+    public Response createTransformedCsdb(InputStream inputStream) {
+        try {
+            csdbService.produce(inputStream);
+            return created(new URI(SERVICE_URI)).build();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return serverError()
                     .entity(entity(e.getMessage(), TEXT_PLAIN))
                     .build();
         }

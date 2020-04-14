@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>de.noack.service.ReportService</OriginalElement>
+  <nodes>
+    <node x="1243.0" y="564.0">de.noack.client.pulsar.ReportPulsarClient</node>
+    <node x="1016.0" y="1254.0">de.noack.model.ReportingSchema</node>
+    <node x="280.0" y="779.0">de.noack.model.ReportedData</node>
+    <node x="722.0" y="378.0">de.noack.client.ReportClient</node>
+    <node x="0.0" y="0.0">de.noack.model.ReportedDataKey</node>
+    <node x="1132.0" y="965.0">de.noack.service.ReportService</node>
+    <node x="689.0" y="1244.0">de.noack.client.kafka.ReportKafkaClient</node>
+    <node x="1607.0" y="983.0">de.noack.service.CommitLog</node>
+    <node x="1523.0" y="1358.0">de.noack.resources.ReportResource</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="de.noack.resources.ReportResource" target="de.noack.service.ReportService">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.service.ReportService" target="de.noack.client.ReportClient">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.service.ReportService" target="de.noack.model.ReportedData">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.model.ReportedData" target="de.noack.model.ReportedDataKey">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.pulsar.ReportPulsarClient" target="de.noack.client.ReportClient">
+      <point x="-1.979224097493585" y="4.591587086389723" />
+      <point x="-1.9792240974936135" y="4.591587086389723" />
+    </edge>
+    <edge source="de.noack.client.ReportClient" target="de.noack.model.ReportedDataKey">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.service.ReportService" target="de.noack.client.kafka.ReportKafkaClient">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.kafka.ReportKafkaClient" target="de.noack.client.ReportClient">
+      <point x="5.063829542645976" y="0.0" />
+      <point x="5.063829542646033" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.ReportClient" target="de.noack.model.ReportingSchema">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.service.ReportService" target="de.noack.service.CommitLog">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.kafka.ReportKafkaClient" target="de.noack.model.ReportedData">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.ReportClient" target="de.noack.model.ReportedData">
+      <point x="-7.1697198285406785" y="0.0" />
+      <point x="-7.1697198285406785" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.pulsar.ReportPulsarClient" target="de.noack.model.ReportingSchema">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.pulsar.ReportPulsarClient" target="de.noack.model.ReportedData">
+      <point x="1.3561922916495917" y="4.812560905388125" />
+      <point x="1.3561922916495632" y="4.812560905388125" />
+    </edge>
+    <edge source="de.noack.service.ReportService" target="de.noack.client.pulsar.ReportPulsarClient">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Orthogonal" zoom="0.6968680089485458" x="902.0" y="884.0" />
+  <SelectedNodes>
+    <node>de.noack.model.ReportingSchema</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>Project Files</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

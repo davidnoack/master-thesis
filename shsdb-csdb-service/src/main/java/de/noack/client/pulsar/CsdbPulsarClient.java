@@ -12,13 +12,9 @@ import org.apache.pulsar.client.impl.schema.JSONSchema;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import java.io.*;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static de.noack.client.CsdbClient.createTransformedCsdb;
-import static de.noack.client.CsdbClient.csdbIsValid;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.pulsar.client.api.CompressionType.LZ4;
@@ -130,31 +126,35 @@ public class CsdbPulsarClient implements CsdbClient {
             Message<byte[]> msg = vanillaConsumer.receive();
             LOGGER.info("Received message with ID {}", msg.getMessageId());
 
-            if (csdbIsValid(msg.getValue())) {
-                try (BufferedReader bufferedReader =
-                             new BufferedReader(new InputStreamReader(new ByteArrayInputStream(msg.getValue())))) {
-                    final String firstLine = bufferedReader.readLine();
-                    final String[] csvAttributes = firstLine.split(CSV_DELIMITER);
-                    final Map<CSDBSchema, Integer> columnOrder = new LinkedHashMap<>();
-                    // Find out order of column headers
-                    for (int i = 0; i < csvAttributes.length; i++) {
-                        columnOrder.put(CSDBSchema.valueOf(csvAttributes[i]), i);
-                    }
-                    // Read the data of the CSDB
-                    bufferedReader.lines().forEach(line -> {
-                        try {
-                            CSDB csdb = createTransformedCsdb(line, columnOrder);
-                            MessageId msgId =
-                                    transformedProducer.newMessage().key(csdb.getCsdbKey().toString()).value(csdb).send();
-                            LOGGER.info("Published message with the ID {}", msgId);
-                        } catch (PulsarClientException e) {
-                            LOGGER.info("Error during send. Reason: {}", e.getMessage());
-                        }
-                    });
-                }
-            }
+            // if (csdbIsValid(msg.getValue())) {
+            produceTransformedCsdb(new ByteArrayInputStream(msg.getValue()));
+            //}
             // Acknowledge processing of the message
             vanillaConsumer.acknowledge(msg);
+        }
+    }
+
+    @Override
+    public void produceTransformedCsdb(final InputStream inputStream) {
+        try (final Scanner scanner = new Scanner(new InputStreamReader(inputStream))) {
+            final String firstLine = scanner.nextLine();
+            final String[] csvAttributes = firstLine.split(CSV_DELIMITER);
+            final Map<CSDBSchema, Integer> columnOrder = new LinkedHashMap<>();
+            // Find out order of column headers
+            for (int i = 0; i < csvAttributes.length; i++) {
+                columnOrder.put(CSDBSchema.valueOf(csvAttributes[i]), i);
+            }
+            // Read the data of the CSDB
+            while (scanner.hasNextLine()) {
+                try {
+                    CSDB csdb = createTransformedCsdb(scanner.nextLine(), columnOrder);
+                    MessageId msgId =
+                            transformedProducer.newMessage().key(csdb.getCsdbKey().toString()).value(csdb).send();
+                    LOGGER.info("Published message with the ID {}", msgId);
+                } catch (PulsarClientException e) {
+                    LOGGER.info("Error during send. Reason: {}", e.getMessage());
+                }
+            }
         }
     }
 

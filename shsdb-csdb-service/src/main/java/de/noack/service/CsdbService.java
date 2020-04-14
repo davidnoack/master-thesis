@@ -51,4 +51,8 @@ public class CsdbService {
     public CSDB findTransformedCsdb(final String messageKey) {
         return csdbClient.findTransformedCsdb(messageKey);
     }
+
+    public void produce(InputStream inputStream) {
+        csdbClient.produceTransformedCsdb(inputStream);
+    }
 }

@@ -3,6 +3,7 @@ package de.noack.client;
 import de.noack.model.CSDB;
 import de.noack.model.CSDBKey;
 import de.noack.model.CSDBSchema;
+import org.apache.pulsar.client.api.PulsarClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import static de.noack.model.CSDBSchema.*;
@@ -358,18 +360,15 @@ public interface CsdbClient {
     }
 
     static boolean csdbIsValid(byte[] currentCsdb) {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(currentCsdb)))) {
+        try (final Scanner scanner = new Scanner(new InputStreamReader(new ByteArrayInputStream(currentCsdb)))) {
             // Only count delimiters of all lines if header is valid.
-            if (isHeaderValid(bufferedReader.readLine())) {
-                return bufferedReader
-                        .lines()
-                        .noneMatch(line -> line.replaceAll("[^" + CSV_DELIMITER + "]", "").length() != CSDBSchema.values().length - 1);
+            //if (isHeaderValid(scanner.nextLine())) {
+            while (scanner.hasNextLine()) {
+                if (scanner.nextLine().replaceAll("[^" + CSV_DELIMITER + "]", "").length() != CSDBSchema.values().length - 1) return false;
             }
-        } catch (IOException e) {
-            LOGGER.error("Error while reading byte array occurred. Reason: {}", e.getMessage());
-            return false;
+            //} else return false;
         }
-        return false;
+        return true;
     }
 
     static boolean isHeaderValid(String header) {
@@ -387,7 +386,9 @@ public interface CsdbClient {
 
     Set<CSDB> allTransformedCsdbs();
 
-    void produceTransformedCsdb() throws IOException;
+    void produceTransformedCsdb() throws PulsarClientException, IOException;
+
+    void produceTransformedCsdb(final InputStream inputStream);
 
     CSDB findTransformedCsdb(final String messageKey);
 }
