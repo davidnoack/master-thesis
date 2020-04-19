@@ -8,6 +8,11 @@ import org.apache.pulsar.shade.com.fasterxml.jackson.annotation.JsonIgnoreProper
 
 import java.math.BigDecimal;
 
+/**
+ * This POJO is used to combine CSDB data as well as reported data to one dataset.
+ *
+ * @author davidnoack
+ */
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor

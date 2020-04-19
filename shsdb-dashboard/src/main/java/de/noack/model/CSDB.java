@@ -11,6 +11,11 @@ import org.apache.pulsar.shade.com.fasterxml.jackson.databind.annotation.JsonSer
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * This POJO represents Centralised Securities Data Base data.
+ *
+ * @author davidnoack
+ */
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor

@@ -22,9 +22,8 @@ import static org.apache.pulsar.client.api.CompressionType.LZ4;
 
 /**
  * This class represents a implementation of {@link DashboardClient} with usage of an Apache Pulsar commit log. It represents a {@link Consumer} as
- * well
- * as a {@link Producer} for records. It reads and produces from and to the topic "csdb-vanilla" which contains all non-manipulated reported
- * data. From this topic it also consumes and transforms messages to produce records for the topic "csdb-transformed". {@link Consumer}s and
+ * well as a {@link Producer} for records. It consumes enriched reported and CSDB data from the respective topics and links them. It reads and
+ * produces from and to the topic "microdata-dashboard" which contains all reported data including CSDB data. {@link Consumer}s and
  * {@link Producer}s are running as long as the application is running to maintain one connection each.
  *
  * @author davidnoack
@@ -34,7 +33,6 @@ public class DashboardPulsarClient implements DashboardClient {
     private static final String SERVICE_URL = "pulsar://localhost:6650";
     private PulsarClient client;
     private Producer<MicroData> dashboardProducer;
-    private Consumer<MicroData> dashboardConsumer;
     private Consumer<CSDB> csdbConsumer;
     private Consumer<ReportedData> reportConsumer;
     private boolean isApplicationRunning;
@@ -79,6 +77,7 @@ public class DashboardPulsarClient implements DashboardClient {
             csdbConsumer.close();
             reportConsumer.close();
         } catch (IOException e) {
+            e.printStackTrace();
             LOGGER.error("Error occurred during close! Reason: {}", e.getMessage());
         }
     }
@@ -88,7 +87,7 @@ public class DashboardPulsarClient implements DashboardClient {
         try {
             while (isApplicationRunning) {
                 // Wait until a message is available
-                Message<CSDB> msg = csdbConsumer.receive();
+                final Message<CSDB> msg = csdbConsumer.receive();
                 LOGGER.info("Received message with ID {}", msg.getMessageId());
                 CONSUMED_CSDBS.put(msg.getValue().getCsdbKey().toString(), msg.getValue());
                 // Acknowledge processing of the message
@@ -104,7 +103,7 @@ public class DashboardPulsarClient implements DashboardClient {
         try {
             while (isApplicationRunning) {
                 // Wait until a message is available
-                Message<ReportedData> msg = reportConsumer.receive();
+                final Message<ReportedData> msg = reportConsumer.receive();
                 LOGGER.info("Received message with ID {}", msg.getMessageId());
                 CONSUMED_REPORTS.add(msg.getValue());
                 // Acknowledge processing of the message
@@ -136,7 +135,7 @@ public class DashboardPulsarClient implements DashboardClient {
                             processedRecords.add(report);
                         }
                     }
-                    if (processedRecords != null && !processedRecords.isEmpty()) CONSUMED_REPORTS.removeAll(processedRecords);
+                    if (!processedRecords.isEmpty()) CONSUMED_REPORTS.removeAll(processedRecords);
                 }
                 sleep(1000);
             } catch (Exception e) {
@@ -152,7 +151,7 @@ public class DashboardPulsarClient implements DashboardClient {
                 .create()) {
             LOGGER.info("Created reader for the topic {}", DASHBOARD_TOPIC_NAME);
             while (!reader.hasReachedEndOfTopic()) {
-                Message<MicroData> message = reader.readNext(1, SECONDS);
+                final Message<MicroData> message = reader.readNext(1, SECONDS);
                 microData.add(message.getValue());
             }
         } catch (Exception e) {

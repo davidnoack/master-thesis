@@ -1,7 +1,8 @@
 package de.noack.model;
 
 /**
- * This enum represents the attributes which can be reported to SHSDB within the sector module. It is used to validate incoming report files.
+ * This enum represents the attributes which can be reported to SHSDB within the sector module. It is used to parse and validate incoming report
+ * files.
  *
  * @author davidnoack
  */

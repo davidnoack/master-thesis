@@ -6,6 +6,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.pulsar.shade.com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * This POJO represents the key of Centralised Securities Data Base data.
+ *
+ * @author davidnoack
+ */
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor

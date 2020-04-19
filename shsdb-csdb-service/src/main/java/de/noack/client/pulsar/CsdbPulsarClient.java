@@ -15,12 +15,13 @@ import java.io.*;
 import java.util.*;
 
 import static de.noack.client.CsdbClient.createTransformedCsdb;
+import static de.noack.client.CsdbClient.csdbIsValid;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.pulsar.client.api.CompressionType.LZ4;
 
 /**
- * This class represents a implementation of {@link CsdbClient} with usage of an Apache Pulsar commit log. It represents a {@link Consumer} as well
+ * This class represents an implementation of {@link CsdbClient} with usage of an Apache Pulsar commit log. It represents a {@link Consumer} as well
  * as a {@link Producer} for records. It reads and produces from and to the topic "csdb-vanilla" which contains all non-manipulated reported
  * data. From this topic it also consumes and transforms messages to produce records for the topic "csdb-transformed". {@link Consumer}s and
  * {@link Producer}s are running as long as the application is running to maintain one connection each. It uses {@link Reader} to query produced
@@ -37,7 +38,7 @@ public class CsdbPulsarClient implements CsdbClient {
     private Producer<CSDB> transformedProducer;
     private boolean isApplicationRunning;
 
-    void onStart(@Observes StartupEvent ev) {
+    void onStart(@Observes final StartupEvent ev) {
         isApplicationRunning = true;
         try {
             client = PulsarClient.builder()
@@ -60,19 +61,19 @@ public class CsdbPulsarClient implements CsdbClient {
                     .compressionType(LZ4)
                     .create();
             LOGGER.info("Created producer for the topic {}", TRANSFORMED_TOPIC_NAME);
-            produceTransformedCsdb();
-        } catch (IOException e) {
+            new Thread(this::produceTransformedCsdb).start();
+        } catch (final IOException e) {
             LOGGER.error("Error occurred during startup! Reason: {}", e.getMessage());
         }
     }
 
-    void onStop(@Observes ShutdownEvent ev) {
+    void onStop(@Observes final ShutdownEvent ev) {
         isApplicationRunning = false;
         try {
             vanillaProducer.close();
             vanillaConsumer.close();
             transformedProducer.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOGGER.error("Error occurred during close! Reason: {}", e.getMessage());
         }
     }
@@ -93,12 +94,12 @@ public class CsdbPulsarClient implements CsdbClient {
                 .create()) {
             LOGGER.info("Created reader for the topic {}", VANILLA_TOPIC_NAME);
             while (!reader.hasReachedEndOfTopic()) {
-                Message<byte[]> message = reader.readNext(1, SECONDS);
+                final Message<byte[]> message = reader.readNext(1, SECONDS);
                 if (message != null) {
                     outputStream.write(message.getValue());
                 } else return;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOGGER.error("Error during reading from topic {} occurred. Reason: {}", VANILLA_TOPIC_NAME, e.getMessage());
         }
     }
@@ -110,27 +111,32 @@ public class CsdbPulsarClient implements CsdbClient {
                 .create()) {
             LOGGER.info("Created reader for the topic {}", VANILLA_TOPIC_NAME);
             while (!reader.hasReachedEndOfTopic()) {
-                Message<byte[]> message = reader.readNext(1, SECONDS);
+                final Message<byte[]> message = reader.readNext(1, SECONDS);
                 if (messageKey.equals(message.getKey())) return new ByteArrayInputStream(message.getValue());
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOGGER.error("Error during reading from topic {} occurred. Reason: {}", VANILLA_TOPIC_NAME, e.getMessage());
         }
         throw new RuntimeException("Message with id " + messageKey + " not found!");
     }
 
     @Override
-    public void produceTransformedCsdb() throws IOException {
+    public void produceTransformedCsdb() {
         while (isApplicationRunning) {
-            // Wait until a message is available
-            Message<byte[]> msg = vanillaConsumer.receive();
-            LOGGER.info("Received message with ID {}", msg.getMessageId());
+            try {
+                // Wait until a message is available
+                Message<byte[]> msg = vanillaConsumer.receive();
+                LOGGER.info("Received message with ID {}", msg.getMessageId());
 
-            // if (csdbIsValid(msg.getValue())) {
-            produceTransformedCsdb(new ByteArrayInputStream(msg.getValue()));
-            //}
-            // Acknowledge processing of the message
-            vanillaConsumer.acknowledge(msg);
+                if (csdbIsValid(msg.getValue())) {
+                    produceTransformedCsdb(new ByteArrayInputStream(msg.getValue()));
+                }
+                // Acknowledge processing of the message
+                vanillaConsumer.acknowledge(msg);
+            } catch (final Exception e) {
+                e.printStackTrace();
+                LOGGER.error("Error during data transformation occurred. Reason: {}", e.getMessage());
+            }
         }
     }
 
@@ -147,11 +153,11 @@ public class CsdbPulsarClient implements CsdbClient {
             // Read the data of the CSDB
             while (scanner.hasNextLine()) {
                 try {
-                    CSDB csdb = createTransformedCsdb(scanner.nextLine(), columnOrder);
-                    MessageId msgId =
+                    final CSDB csdb = createTransformedCsdb(scanner.nextLine(), columnOrder);
+                    final MessageId msgId =
                             transformedProducer.newMessage().key(csdb.getCsdbKey().toString()).value(csdb).send();
                     LOGGER.info("Published message with the ID {}", msgId);
-                } catch (PulsarClientException e) {
+                } catch (final PulsarClientException e) {
                     LOGGER.info("Error during send. Reason: {}", e.getMessage());
                 }
             }
@@ -160,35 +166,36 @@ public class CsdbPulsarClient implements CsdbClient {
 
     @Override
     public Set<CSDB> allTransformedCsdbs() {
-        Set<CSDB> result = new HashSet<>();
+        final Set<CSDB> result = new HashSet<>();
         try (final Reader<CSDB> reader = client.newReader(JSONSchema.of(CSDB.class))
                 .topic(TRANSFORMED_TOPIC_NAME)
                 .startMessageId(MessageId.earliest)
                 .create()) {
             LOGGER.info("Created reader for the topic {}", TRANSFORMED_TOPIC_NAME);
             do {
-                Message<CSDB> message = reader.readNext(1, SECONDS);
+                final Message<CSDB> message = reader.readNext(1, SECONDS);
                 if (message != null) {
                     result.add(message.getValue());
                 } else break;
             } while (!reader.hasReachedEndOfTopic());
-        } catch (IOException e) {
+        } catch (final IOException e) {
+            e.printStackTrace();
             LOGGER.error("Error during reading from topic {} occurred. Reason: {}", TRANSFORMED_TOPIC_NAME, e.getMessage());
         }
         return result;
     }
 
     @Override
-    public CSDB findTransformedCsdb(String messageKey) {
+    public CSDB findTransformedCsdb(final String messageKey) {
         try (final Reader<CSDB> reader = client.newReader(JSONSchema.of(CSDB.class)).topic(TRANSFORMED_TOPIC_NAME)
                 .startMessageId(MessageId.earliest)
                 .create()) {
             LOGGER.info("Created reader for the topic {}", TRANSFORMED_TOPIC_NAME);
             while (!reader.hasReachedEndOfTopic()) {
-                Message<CSDB> message = reader.readNext(1, SECONDS);
+                final Message<CSDB> message = reader.readNext(1, SECONDS);
                 if (messageKey.equals(message.getKey())) return message.getValue();
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOGGER.error("Error during reading from topic {} occurred. Reason: {}", TRANSFORMED_TOPIC_NAME, e.getMessage());
         }
         throw new RuntimeException("Message with id " + messageKey + " not found!");

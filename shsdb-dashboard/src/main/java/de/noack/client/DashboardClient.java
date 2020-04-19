@@ -41,7 +41,7 @@ public interface DashboardClient {
 
     void consumeReports();
 
-    void produceMicroData() throws InterruptedException;
+    void produceMicroData();
 
     Set<MicroData> readAllMicroData();
 }

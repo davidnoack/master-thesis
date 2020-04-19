@@ -23,7 +23,7 @@ import java.util.Set;
 @RequestScoped
 public class ReportService {
     private static final String IMPLEMENTATION_MISSING = "Not yet implemented!";
-    private ReportClient reportClient;
+    private final ReportClient reportClient;
 
     @Inject
     public ReportService(@ConfigProperty(name = "commitlog") final CommitLog commitLog, ReportPulsarClient reportPulsarClient) {

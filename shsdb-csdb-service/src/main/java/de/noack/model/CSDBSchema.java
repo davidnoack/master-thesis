@@ -1,5 +1,11 @@
 package de.noack.model;
 
+/**
+ * This enum represents the attributes which the Centralised Securities Data Base contains. It is used to parse and validate incoming CSDB
+ * files.
+ *
+ * @author davidnoack
+ */
 public enum CSDBSchema {
     ACCR_INCOME_FACTOR,
     ACCR_INTEREST,
@@ -18,9 +24,9 @@ public enum CSDBSchema {
     DIV_AMOUNT,
     DIV_TYPE,
     DIV_CURRENCY,
-    DIV_DT,
-    DIV_FREQ,
     DIV_INCOME_EUR,
+    DIV_FREQ,
+    DIV_DT,
     IN_EADB,
     ESA_INS_2010,
     ESA_INS,
@@ -55,10 +61,10 @@ public enum CSDBSchema {
     SPLIT_DT,
     SPLIT_FAC,
     YIELD,
+    IDENTIFIER,
     AVERAGE_PRICE_1,
     AVERAGE_PRICE_2,
-    IDENTIFIER,
-    PERIOD,
     VERSION,
+    PERIOD,
     NUMBER_OUTST
 }

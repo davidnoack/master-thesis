@@ -10,7 +10,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import javax.enterprise.context.RequestScoped;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -53,7 +52,7 @@ public class ReportKafkaClient implements ReportClient {
     }
 
     @Override
-    public String produceVanillaReport(byte[] report) throws IOException {
+    public String produceVanillaReport(byte[] report) {
         Producer<String, String> producer = createProducer();
         final ProducerRecord<String, String> record = new ProducerRecord<>(String.valueOf(UUID.randomUUID()),
                 new String(report));
@@ -85,7 +84,7 @@ public class ReportKafkaClient implements ReportClient {
     }
 
     @Override
-    public void produceTransformedReport() throws IOException {
+    public void produceTransformedReport() {
 
     }
 

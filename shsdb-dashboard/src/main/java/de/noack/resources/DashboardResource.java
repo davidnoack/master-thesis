@@ -30,7 +30,7 @@ public class DashboardResource {
     public Response getTransformedReports() {
         try {
             return ok(dashboardService.allMicroData()).build();
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
                     .entity(entity(e.getMessage(), TEXT_PLAIN))
@@ -44,7 +44,7 @@ public class DashboardResource {
     public Response getReportedInstrumentClassesWithCount() {
         try {
             return ok(dashboardService.instrumentClassesWithCount()).build();
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
                     .entity(entity(e.getMessage(), TEXT_PLAIN))

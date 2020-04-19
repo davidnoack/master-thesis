@@ -4,6 +4,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.pulsar.shade.com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * This POJO combines CSDB data with the respective reported securities data.
+ *
+ * @author davidnoack
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)

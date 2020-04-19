@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.groupingBy;
 @RequestScoped
 public class DashboardService {
     private static final String IMPLEMENTATION_MISSING = "Not yet implemented!";
-    private DashboardClient dashboardClient;
+    private final DashboardClient dashboardClient;
 
     @Inject
     public DashboardService(@ConfigProperty(name = "commitlog") final CommitLog commitLog, DashboardPulsarClient dashboardPulsarClient) {
@@ -39,10 +39,9 @@ public class DashboardService {
     }
 
     public Map<String, Long> instrumentClassesWithCount() {
-        Map<String, Long> foundInstrumentClasses = dashboardClient.readAllMicroData().stream()
+        return dashboardClient.readAllMicroData().stream()
                 .map(microData -> microData.getSecurity().getInstrumentClass())
                 .filter(string -> string != null && !string.isEmpty())
                 .collect(groupingBy(identity(), counting()));
-        return foundInstrumentClasses;
     }
 }

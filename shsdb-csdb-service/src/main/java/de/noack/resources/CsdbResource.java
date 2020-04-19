@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.InputStream;
 import java.net.URI;
 
 import static javax.ws.rs.client.Entity.entity;
@@ -17,22 +16,23 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.*;
 
 /**
- * This resource serves all csdbs of SHSDB retrieved within the last five years. Posted Csdbs will be persisted to a commit log selected within
- * the application properties. One csdb can be retrieved in a transformed way or as raw data. One dataset can only be accessed when it has been
- * transformed to JSON beforehand.
+ * This resource serves all Centralised Securities Data Base data of SHSDB retrieved within the last five years. Posted CSDBs will be persisted to a
+ * commit log selected within the application properties. One CSDB can be retrieved in a transformed way or as raw data. One dataset can only be
+ * accessed when it has been transformed to JSON beforehand.
  *
  * @author davidnoack
  */
 @Path("/csdbs")
 public class CsdbResource {
     private static final String SERVICE_URI = "/csdbs/";
+    private static final String TEXT_CSV = "text/csv";
     private static final Logger LOGGER = LoggerFactory.getLogger(CsdbResource.class);
 
     @Inject
     private CsdbService csdbService;
 
     @POST
-    @Consumes({"application/gzip", "text/csv"})
+    @Consumes({APPLICATION_OCTET_STREAM, TEXT_CSV})
     public Response createVanillaCsdb(byte[] content) {
         try {
             final String messageKey = csdbService.produce(content);
@@ -46,7 +46,7 @@ public class CsdbResource {
     }
 
     @GET
-    @Produces(TEXT_PLAIN)
+    @Produces(TEXT_CSV)
     public Response getVanillaCsdbs() {
         try {
             final StreamingOutput stream = csdbService::allVanillaCsdbs;
@@ -61,28 +61,13 @@ public class CsdbResource {
 
     @GET
     @Path("{id}")
-    @Produces(TEXT_PLAIN)
+    @Produces(TEXT_CSV)
     public Response getVanillaCsdb(@PathParam("id") String messageKey) {
         try {
             return ok(csdbService.findVanillaCsdb(messageKey), APPLICATION_OCTET_STREAM).build();
         } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
-                    .entity(entity(e.getMessage(), TEXT_PLAIN))
-                    .build();
-        }
-    }
-
-    @POST
-    @Path("transformed")
-    @Consumes({"application/gzip", "text/csv"})
-    public Response createTransformedCsdb(InputStream inputStream) {
-        try {
-            csdbService.produce(inputStream);
-            return created(new URI(SERVICE_URI)).build();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return serverError()
                     .entity(entity(e.getMessage(), TEXT_PLAIN))
                     .build();
         }

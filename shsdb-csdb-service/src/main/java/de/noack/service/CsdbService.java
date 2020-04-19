@@ -15,7 +15,7 @@ import java.util.Set;
 @RequestScoped
 public class CsdbService {
     private static final String IMPLEMENTATION_MISSING = "Not yet implemented!";
-    private CsdbClient csdbClient;
+    private final CsdbClient csdbClient;
 
     @Inject
     public CsdbService(@ConfigProperty(name = "commitlog") final CommitLog commitLog, CsdbPulsarClient csdbPulsarClient) {
@@ -50,9 +50,5 @@ public class CsdbService {
 
     public CSDB findTransformedCsdb(final String messageKey) {
         return csdbClient.findTransformedCsdb(messageKey);
-    }
-
-    public void produce(InputStream inputStream) {
-        csdbClient.produceTransformedCsdb(inputStream);
     }
 }

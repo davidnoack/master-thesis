@@ -25,18 +25,19 @@ import static javax.ws.rs.core.Response.*;
 @Path("/reports")
 public class ReportResource {
     private static final String SERVICE_URI = "/reports/";
+    private static final String TEXT_CSV = "text/csv";
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportResource.class);
 
     @Inject
     private ReportService reportService;
 
     @POST
-    @Consumes({APPLICATION_OCTET_STREAM, "text/csv"})
-    public Response createVanillaReport(byte[] content) {
+    @Consumes({APPLICATION_OCTET_STREAM, TEXT_CSV})
+    public Response createVanillaReport(final byte[] content) {
         try {
             final String messageKey = reportService.produce(content);
             return created(new URI(SERVICE_URI + messageKey)).build();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error(e.getMessage());
             return serverError()
                     .entity(entity(e.getMessage(), TEXT_PLAIN))
@@ -50,7 +51,7 @@ public class ReportResource {
         try {
             final StreamingOutput stream = reportService::allVanillaReports;
             return ok(stream).build();
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
                     .entity(entity(e.getMessage(), TEXT_PLAIN))
@@ -61,10 +62,10 @@ public class ReportResource {
     @GET
     @Path("{id}")
     @Produces(TEXT_PLAIN)
-    public Response getVanillaReport(@PathParam("id") String messageKey) {
+    public Response getVanillaReport(@PathParam("id") final String messageKey) {
         try {
             return ok(reportService.findVanillaReport(messageKey), APPLICATION_OCTET_STREAM).build();
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
                     .entity(entity(e.getMessage(), TEXT_PLAIN))
@@ -78,7 +79,7 @@ public class ReportResource {
     public Response getTransformedReports() {
         try {
             return ok(reportService.allTransformedReports()).build();
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
                     .entity(entity(e.getMessage(), TEXT_PLAIN))
@@ -92,7 +93,7 @@ public class ReportResource {
     public Response getTransformedReport(@PathParam("id") final String messageKey) {
         try {
             return ok(reportService.findTransformedReport(messageKey)).build();
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             LOGGER.error(e.getMessage());
             return status(NOT_FOUND)
                     .entity(entity(e.getMessage(), TEXT_PLAIN))

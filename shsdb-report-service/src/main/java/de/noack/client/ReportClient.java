@@ -8,12 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
 import static de.noack.model.ReportingSchema.*;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
 
 /**
  * This interface encapsulates all functionality to be provided by a report client, independent of its commit log technology. It defines the Topic
@@ -29,18 +28,6 @@ public interface ReportClient {
     String VANILLA_SUBSCRIPTION_NAME = "reports-vanilla-subscription";
     String TRANSFORMED_TOPIC_NAME = "reports-transformed";
 
-    String produceVanillaReport(final byte[] report) throws IOException;
-
-    InputStream findVanillaReport(final String messageKey);
-
-    void allVanillaReports(final OutputStream outputStream);
-
-    Set<ReportedData> allTransformedReports();
-
-    void produceTransformedReport() throws IOException;
-
-    ReportedData findTransformedReport(final String messageKey);
-
     static ReportedData createTransformedReport(final String csvLine, final Map<ReportingSchema, Integer> columnOrder) {
         final String[] attributes = csvLine.split(CSV_DELIMITER);
         final int maxArrayIndex = attributes.length - 1;
@@ -53,7 +40,7 @@ public interface ReportClient {
                 attributes[periodColumn].trim();
         final String periodIntegerString;
         if (periodString != null && periodString.contains("Q")) {
-            final Integer quarter = Integer.parseInt(periodString.substring(6));
+            final int quarter = Integer.parseInt(periodString.substring(6));
             if (quarter == 4) periodIntegerString = periodString.substring(0, 4) + "12";
             else periodIntegerString = periodString.substring(0, 4) + "0" + quarter * 3;
         } else {
@@ -142,25 +129,36 @@ public interface ReportClient {
         return reportedData;
     }
 
-    static boolean reportIsValid(byte[] currentReport) {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(currentReport)))) {
+    static boolean reportIsValid(final byte[] currentReport) {
+        try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(currentReport)))) {
             // Only count delimiters of all lines if header is valid.
             if (isHeaderValid(bufferedReader.readLine())) {
                 return bufferedReader
                         .lines()
                         .noneMatch(line -> line.replaceAll("[^" + CSV_DELIMITER + "]", "").length() != ReportingSchema.values().length - 1);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOGGER.error("Error while reading byte array occurred. Reason: {}", e.getMessage());
             return false;
         }
         return false;
     }
 
-    static boolean isHeaderValid(String header) {
-        return stream(ReportingSchema.values())
+    static boolean isHeaderValid(final String header) {
+        return Arrays.stream(ReportingSchema.values())
                 .map(ReportingSchema::name)
-                .collect(joining(CSV_DELIMITER))
-                .equals(header);
+                .allMatch(attribute -> Arrays.asList(header.split(CSV_DELIMITER)).contains(attribute));
     }
+
+    String produceVanillaReport(final byte[] report) throws IOException;
+
+    InputStream findVanillaReport(final String messageKey);
+
+    void allVanillaReports(final OutputStream outputStream);
+
+    Set<ReportedData> allTransformedReports();
+
+    void produceTransformedReport();
+
+    ReportedData findTransformedReport(final String messageKey);
 }

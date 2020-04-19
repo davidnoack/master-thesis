@@ -3,7 +3,6 @@ package de.noack.client;
 import de.noack.model.CSDB;
 import de.noack.model.CSDBKey;
 import de.noack.model.CSDBSchema;
-import org.apache.pulsar.client.api.PulsarClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,13 +10,12 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.noack.model.CSDBSchema.*;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
 
 public interface CsdbClient {
     String CSV_DELIMITER = ";";
@@ -359,23 +357,25 @@ public interface CsdbClient {
         return csdb;
     }
 
-    static boolean csdbIsValid(byte[] currentCsdb) {
-        try (final Scanner scanner = new Scanner(new InputStreamReader(new ByteArrayInputStream(currentCsdb)))) {
+    static boolean csdbIsValid(final byte[] currentReport) {
+        try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(currentReport)))) {
             // Only count delimiters of all lines if header is valid.
-            //if (isHeaderValid(scanner.nextLine())) {
-            while (scanner.hasNextLine()) {
-                if (scanner.nextLine().replaceAll("[^" + CSV_DELIMITER + "]", "").length() != CSDBSchema.values().length - 1) return false;
+            if (isHeaderValid(bufferedReader.readLine())) {
+                final int csvColumnCount = bufferedReader.readLine().split(CSV_DELIMITER).length;
+                return bufferedReader
+                        .lines()
+                        .noneMatch(line -> line.replaceAll("[^" + CSV_DELIMITER + "]", "").length() != csvColumnCount - 1);
             }
-            //} else return false;
+        } catch (final IOException e) {
+            LOGGER.error("Error while reading byte array occurred. Reason: {}", e.getMessage());
+            return false;
         }
-        return true;
+        return false;
     }
 
-    static boolean isHeaderValid(String header) {
-        return stream(CSDBSchema.values())
-                .map(CSDBSchema::name)
-                .collect(joining(CSV_DELIMITER))
-                .equals(header);
+    static boolean isHeaderValid(final String header) {
+        return Arrays.stream(header.split(CSV_DELIMITER))
+                .allMatch(attribute -> Arrays.stream(CSDBSchema.values()).map(CSDBSchema::name).collect(Collectors.toList()).contains(attribute));
     }
 
     String produceVanillaCsdb(final byte[] Csdb) throws IOException;
@@ -386,7 +386,7 @@ public interface CsdbClient {
 
     Set<CSDB> allTransformedCsdbs();
 
-    void produceTransformedCsdb() throws PulsarClientException, IOException;
+    void produceTransformedCsdb() throws IOException;
 
     void produceTransformedCsdb(final InputStream inputStream);
 
