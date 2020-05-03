@@ -20,7 +20,7 @@ public class DashboardService {
     private final DashboardClient dashboardClient;
 
     @Inject
-    public DashboardService(@ConfigProperty(name = "commitlog") final CommitLog commitLog, DashboardPulsarClient dashboardPulsarClient) {
+    public DashboardService(@ConfigProperty(name = "commitlog") final CommitLog commitLog, final DashboardPulsarClient dashboardPulsarClient) {
         super();
         switch (commitLog) {
             case PULSAR:

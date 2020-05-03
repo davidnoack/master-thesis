@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>de.noack.model.MicroDataKey</OriginalElement>
+  <nodes>
+    <node x="1871.0" y="482.0">de.noack.client.pulsar.DashboardPulsarClient</node>
+    <node x="2595.5310668229777" y="300.26494724501765">de.noack.model.MicroDataKey</node>
+    <node x="1494.9566236811254" y="-5.252051582649472">de.noack.model.CSDB</node>
+    <node x="2025.0" y="839.0">de.noack.client.DashboardClient</node>
+    <node x="2210.7327080890973" y="405.6002344665885">de.noack.service.DashboardService</node>
+    <node x="2464.812426729191" y="1314.8933177022273">de.noack.model.ReportedDataKey</node>
+    <node x="2593.0" y="0.0">de.noack.resources.DashboardResource</node>
+    <node x="2514.041031652989" y="838.1606096131302">de.noack.model.MicroData</node>
+    <node x="1750.0" y="910.0">de.noack.model.Security</node>
+    <node x="1817.0" y="1322.0">de.noack.model.ReportedData</node>
+    <node x="1494.0351699882767" y="1500.339976553341">de.noack.model.CSDBKey</node>
+    <node x="2137.0" y="41.0">de.noack.service.CommitLog</node>
+    <node x="1885.9882766705741" y="218.56740914419697">de.noack.model.LocalDateSerializer</node>
+    <node x="1752.2157092614302" y="32.75967174677609">de.noack.model.LocalDateDeserializer</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="de.noack.service.DashboardService" target="de.noack.client.pulsar.DashboardPulsarClient">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.pulsar.DashboardPulsarClient" target="de.noack.model.CSDB">
+      <point x="1.7756324464895954" y="4.674091292965244" />
+      <point x="1.775632446489567" y="4.674091292965244" />
+    </edge>
+    <edge source="de.noack.model.CSDB" target="de.noack.model.LocalDateSerializer">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.DashboardClient" target="de.noack.model.MicroDataKey">
+      <point x="0.0" y="5.2031718117411" />
+      <point x="0.0" y="5.203171811741129" />
+    </edge>
+    <edge source="de.noack.model.ReportedData" target="de.noack.model.ReportedDataKey">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.model.CSDB" target="de.noack.model.LocalDateDeserializer">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.model.MicroData" target="de.noack.model.MicroDataKey">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.pulsar.DashboardPulsarClient" target="de.noack.client.DashboardClient">
+      <point x="4.550773038690323" y="-2.0713437064690936" />
+      <point x="4.550773038690352" y="-2.0713437064690936" />
+    </edge>
+    <edge source="de.noack.model.CSDB" target="de.noack.model.CSDBKey">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.service.DashboardService" target="de.noack.service.CommitLog">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.resources.DashboardResource" target="de.noack.service.DashboardService">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.DashboardClient" target="de.noack.model.ReportedDataKey">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.DashboardClient" target="de.noack.model.ReportedData">
+      <point x="4.863484890536483" y="1.1603942086736367" />
+      <point x="4.863484890536483" y="1.1603942086736652" />
+    </edge>
+    <edge source="de.noack.client.DashboardClient" target="de.noack.model.MicroData">
+      <point x="-0.5795903625633514" y="-4.966293890983877" />
+      <point x="-0.5795903625632945" y="-4.966293890983877" />
+    </edge>
+    <edge source="de.noack.service.DashboardService" target="de.noack.model.MicroData">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.model.MicroData" target="de.noack.model.Security">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.pulsar.DashboardPulsarClient" target="de.noack.model.MicroData">
+      <point x="2.322087604231399" y="-4.428081882516949" />
+      <point x="2.322087604231342" y="-4.428081882516949" />
+    </edge>
+    <edge source="de.noack.service.DashboardService" target="de.noack.client.DashboardClient">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.client.DashboardClient" target="de.noack.model.CSDB">
+      <point x="-0.13171897588745196" y="4.998264710015974" />
+      <point x="-0.13171897588745196" y="4.998264710015974" />
+    </edge>
+    <edge source="de.noack.client.DashboardClient" target="de.noack.model.Security">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="de.noack.model.Security" target="de.noack.model.CSDB">
+      <point x="-0.36660756427267494" y="4.986541777005186" />
+      <point x="-0.36660756427272645" y="4.986541777005186" />
+    </edge>
+    <edge source="de.noack.client.pulsar.DashboardPulsarClient" target="de.noack.model.ReportedData">
+      <point x="-5.005514728247078" y="0.0" />
+      <point x="-5.005514728247078" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Orthogonal" zoom="0.4746800222593211" x="2431.0" y="882.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>Project Files</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

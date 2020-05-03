@@ -3,11 +3,10 @@ const width = 600;
 height = 600
 margin = 40
 
-
 // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
 const radius = Math.min(width, height) / 2 - margin;
 
-// append the svg object to the div called 'my_dataviz'
+// append the svg object to the div called 'instrumentClasses'
 const svg = d3.select("#instrumentClasses")
     .append("svg")
     .attr("width", width)
@@ -15,7 +14,7 @@ const svg = d3.select("#instrumentClasses")
     .append("g")
     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-// Create dummy data
+// Create required data
 const xhReq = new XMLHttpRequest();
 xhReq.open("GET", "/dashboard/instrumentClassesWithCount", false);
 xhReq.send(null);

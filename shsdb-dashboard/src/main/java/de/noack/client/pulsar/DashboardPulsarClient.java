@@ -37,7 +37,7 @@ public class DashboardPulsarClient implements DashboardClient {
     private Consumer<ReportedData> reportConsumer;
     private boolean isApplicationRunning;
 
-    void onStart(@Observes StartupEvent ev) {
+    void onStart(@Observes final StartupEvent ev) {
         isApplicationRunning = true;
         try {
             client = PulsarClient.builder()
@@ -64,13 +64,13 @@ public class DashboardPulsarClient implements DashboardClient {
             new Thread(this::consumeCsdb).start();
             new Thread(this::consumeReports).start();
             new Thread(this::produceMicroData).start();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             LOGGER.error("Error occurred during startup! Reason: {}", e.getMessage());
         }
     }
 
-    void onStop(@Observes ShutdownEvent ev) {
+    void onStop(@Observes final ShutdownEvent ev) {
         isApplicationRunning = false;
         try {
             dashboardProducer.close();
@@ -127,10 +127,14 @@ public class DashboardPulsarClient implements DashboardClient {
                         final String csdbKeyVersion1 = isin + "+" + (period + 1) + "+" + "1";
                         if (CONSUMED_CSDBS.containsKey(csdbKeyVersion1) || CONSUMED_CSDBS.containsKey(csdbKeyVersion0)) {
                             final MicroData microData =
-                                    createMicroData(CONSUMED_CSDBS.containsKey(csdbKeyVersion1) ? CONSUMED_CSDBS.get(csdbKeyVersion1) :
+                                    createMicroData(CONSUMED_CSDBS.containsKey(csdbKeyVersion1) ?
+                                            CONSUMED_CSDBS.get(csdbKeyVersion1) :
                                             CONSUMED_CSDBS.get(csdbKeyVersion0), report);
                             final MessageId msgId =
-                                    dashboardProducer.newMessage().key(report.getReportedDataKey().toString()).value(microData).send();
+                                    dashboardProducer.newMessage()
+                                            .key(report.getReportedDataKey().toString())
+                                            .value(microData)
+                                            .send();
                             LOGGER.info("Produced message with ID {}", msgId);
                             processedRecords.add(report);
                         }
@@ -154,7 +158,7 @@ public class DashboardPulsarClient implements DashboardClient {
                 final Message<MicroData> message = reader.readNext(1, SECONDS);
                 microData.add(message.getValue());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("Error during reading from topic {} occurred. Reason: {}", DASHBOARD_TOPIC_NAME, e.getMessage());
         }
         return microData;
